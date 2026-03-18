@@ -2,576 +2,750 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>充電嗨翻天 — 積分挑戰賽</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>充電嗨翻天 — 積分查詢</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+TC:wght@300;400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --neon: #00f5ff;
+    --cyan: #00f5ff;
     --gold: #ffd700;
     --pink: #ff2d78;
     --purple: #7b2fff;
     --green: #00ff9d;
     --bg: #060614;
     --card: rgba(255,255,255,0.04);
-    --border: rgba(0,245,255,0.2);
+    --border: rgba(0,245,255,0.25);
   }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
-    background: var(--bg); color: #fff;
+    background: var(--bg);
+    color: #e0e8ff;
     font-family: 'Noto Sans TC', sans-serif;
-    min-height: 100vh; overflow-x: hidden;
-    -webkit-text-size-adjust: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
   }
 
-  .bg-grid {
-    position: fixed; inset: 0; z-index: 0;
+  /* ── Background ── */
+  .bg-glow {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  }
+  .bg-glow::before {
+    content: '';
+    position: absolute; top: -20%; left: -10%;
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, rgba(123,47,255,0.18) 0%, transparent 70%);
+    animation: drift1 12s ease-in-out infinite alternate;
+  }
+  .bg-glow::after {
+    content: '';
+    position: absolute; bottom: -10%; right: -10%;
+    width: 50vw; height: 50vw;
+    background: radial-gradient(circle, rgba(0,245,255,0.12) 0%, transparent 70%);
+    animation: drift2 15s ease-in-out infinite alternate;
+  }
+  @keyframes drift1 { from {transform:translate(0,0)} to {transform:translate(5vw,8vh)} }
+  @keyframes drift2 { from {transform:translate(0,0)} to {transform:translate(-4vw,-6vh)} }
+
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
     background-image:
       linear-gradient(rgba(0,245,255,0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0,245,255,0.04) 1px, transparent 1px);
-    background-size: 60px 60px;
-    animation: gridMove 20s linear infinite;
+    background-size: 40px 40px;
   }
-  @keyframes gridMove { to { background-position: 0 60px; } }
 
-  .orbs { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  .orb { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.22; animation: orbFloat 8s ease-in-out infinite; }
-  .orb1 { width: 300px; height: 300px; background: var(--purple); top: -80px; left: -80px; }
-  .orb2 { width: 250px; height: 250px; background: var(--pink); top: 30%; right: -60px; animation-delay: -3s; }
-  .orb3 { width: 280px; height: 280px; background: var(--neon); bottom: -80px; left: 30%; animation-delay: -6s; opacity: 0.12; }
-  @keyframes orbFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-20px) scale(1.04)} }
-
-  .wrapper { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 0 16px 60px; }
-
-  /* HEADER */
-  header { text-align: center; padding: 36px 0 20px; }
-  .event-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    padding: 5px 16px; border-radius: 999px;
-    font-size: 12px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; margin-bottom: 14px;
-    animation: pulse 2s ease-in-out infinite;
+  .container {
+    position: relative; z-index: 1;
+    max-width: 760px; margin: 0 auto;
+    padding: clamp(12px,3vw,24px);
   }
-  @keyframes pulse { 0%,100%{box-shadow:0 0 0 0 rgba(255,45,120,0.4)} 50%{box-shadow:0 0 0 10px rgba(255,45,120,0)} }
-  h1 {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(24px, 8vw, 64px); font-weight: 900;
-    background: linear-gradient(135deg, var(--neon), var(--purple), var(--pink));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    line-height: 1.1; margin-bottom: 8px;
-    filter: drop-shadow(0 0 20px rgba(0,245,255,0.3));
-  }
-  .subtitle { font-size: clamp(13px, 3.5vw, 16px); color: rgba(255,255,255,0.6); letter-spacing: 1px; }
 
-  /* COUNTDOWN */
-  .countdown-wrap { display: flex; justify-content: center; gap: 8px; margin: 18px 0; }
-  .countdown-box {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 10px 6px; text-align: center;
-    backdrop-filter: blur(10px); flex: 1; min-width: 0;
+  /* ── Header ── */
+  header {
+    text-align: center;
+    padding: clamp(24px,5vw,48px) 0 clamp(16px,3vw,28px);
   }
-  .countdown-num {
-    font-family: 'Orbitron', monospace;
-    font-size: clamp(20px, 5.5vw, 34px); font-weight: 900;
-    color: var(--neon); display: block; text-shadow: 0 0 15px var(--neon); line-height: 1;
-  }
-  .countdown-label { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px; }
-
-  /* CARD */
-  .card {
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 20px; padding: 22px; backdrop-filter: blur(12px);
+  .badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,45,120,0.15);
+    border: 1px solid rgba(255,45,120,0.5);
+    border-radius: 20px;
+    padding: 4px 14px;
+    font-size: clamp(10px,2vw,12px);
+    font-family: 'Orbitron', sans-serif;
+    color: var(--pink);
+    letter-spacing: 1px;
     margin-bottom: 16px;
   }
-  .card-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--neon);
-    margin-bottom: 18px; display: flex; align-items: center; gap: 6px;
+  .badge-dot {
+    width: 7px; height: 7px;
+    background: var(--pink);
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
   }
-
-  /* USER PANEL */
-  .user-info { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
-  .avatar {
-    width: 52px; height: 52px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0; box-shadow: 0 0 20px rgba(123,47,255,0.5);
+  @keyframes pulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50% { opacity:0.4; transform:scale(0.6); }
   }
-  .user-name { font-size: clamp(16px, 4vw, 20px); font-weight: 700; }
-  .user-rank { font-size: 13px; color: var(--gold); margin-top: 2px; }
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(28px,7vw,56px);
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 60%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+    letter-spacing: -1px;
+  }
+  .subtitle {
+    font-size: clamp(12px,2.5vw,15px);
+    color: rgba(224,232,255,0.55);
+    margin-top: 10px;
+    letter-spacing: 2px;
+  }
+  .subtitle span { color: var(--cyan); }
 
-  .pts-big {
+  /* ── Countdown ── */
+  .countdown {
+    display: flex; justify-content: center; gap: clamp(8px,2vw,16px);
+    margin-top: clamp(14px,3vw,24px);
+  }
+  .cd-unit {
     text-align: center;
-    background: linear-gradient(135deg, rgba(0,245,255,0.08), rgba(123,47,255,0.08));
-    border: 1px solid rgba(0,245,255,0.2); border-radius: 16px; padding: 18px;
-    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: clamp(6px,1.5vw,10px) clamp(10px,2.5vw,18px);
+    min-width: clamp(50px,12vw,70px);
+    backdrop-filter: blur(8px);
   }
-  .pts-num {
-    font-family: 'Orbitron', monospace; font-size: clamp(36px, 10vw, 56px); font-weight: 900;
-    background: linear-gradient(135deg, var(--neon), var(--green));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px rgba(0,245,255,0.5)); line-height: 1;
+  .cd-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(18px,4vw,28px);
+    font-weight: 700;
+    color: var(--cyan);
+    text-shadow: 0 0 12px rgba(0,245,255,0.7);
+    display: block;
   }
-  .pts-label { font-size: 12px; color: rgba(255,255,255,0.5); margin-top: 6px; }
+  .cd-label {
+    font-size: clamp(9px,1.8vw,11px);
+    color: rgba(224,232,255,0.4);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
 
-  /* THERMOMETER PRIZES */
-  .thermo-wrap {
-    position: relative;
-    display: flex;
-    gap: 0;
+  /* ── Search ── */
+  .search-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: clamp(16px,4vw,28px);
+    backdrop-filter: blur(12px);
+    margin-bottom: clamp(16px,3vw,24px);
   }
+  .search-title {
+    font-size: clamp(13px,2.5vw,15px);
+    color: rgba(224,232,255,0.6);
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .search-row {
+    display: flex; gap: 10px;
+  }
+  .search-input {
+    flex: 1;
+    background: rgba(0,0,0,0.35);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #fff;
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(13px,2.5vw,16px);
+    letter-spacing: 2px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus {
+    border-color: var(--cyan);
+    box-shadow: 0 0 16px rgba(0,245,255,0.2);
+  }
+  .search-input::placeholder { color: rgba(255,255,255,0.2); letter-spacing: 1px; }
+  .search-btn {
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    border: none;
+    border-radius: 10px;
+    padding: 12px 22px;
+    color: #000;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(12px,2vw,14px);
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    white-space: nowrap;
+  }
+  .search-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,245,255,0.35);
+  }
+  .search-btn:active { transform: translateY(0); }
 
-  /* Left: thermometer bar */
-  .thermo-bar-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 36px;
+  /* ── Account Card ── */
+  #account-card {
+    display: none;
+    background: var(--card);
+    border: 1px solid rgba(0,245,255,0.35);
+    border-radius: 16px;
+    padding: clamp(16px,4vw,28px);
+    backdrop-filter: blur(12px);
+    margin-bottom: clamp(16px,3vw,24px);
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(16px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  .account-top {
+    display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
+  }
+  .avatar {
+    font-size: clamp(30px,6vw,42px);
+    width: clamp(52px,10vw,64px); height: clamp(52px,10vw,64px);
+    background: rgba(0,245,255,0.08);
+    border: 2px solid rgba(0,245,255,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
     flex-shrink: 0;
-    padding-top: 4px;
+  }
+  .account-info { flex: 1; }
+  .account-name {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(13px,2.5vw,16px);
+    color: #fff;
+    letter-spacing: 2px;
+    margin-bottom: 4px;
+  }
+  .account-rank {
+    font-size: clamp(11px,2vw,13px);
+    color: rgba(224,232,255,0.5);
+  }
+  .account-rank span {
+    color: var(--gold);
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .score-display {
+    text-align: center;
+    margin-bottom: 8px;
+  }
+  .score-num {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(44px,10vw,72px);
+    font-weight: 900;
+    color: var(--cyan);
+    text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(0,245,255,0.4);
+    line-height: 1;
+    display: block;
+  }
+  .score-label {
+    font-size: clamp(11px,2vw,13px);
+    color: rgba(224,232,255,0.4);
+    letter-spacing: 3px;
+    margin-top: 4px;
+  }
+
+  /* ── Thermometer / Prizes ── */
+  .prizes-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: clamp(16px,4vw,28px);
+    backdrop-filter: blur(12px);
+    margin-bottom: clamp(16px,3vw,24px);
+    display: none;
+  }
+  .prizes-section.visible { display: block; animation: fadeUp 0.4s ease; }
+  .section-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(12px,2.5vw,15px);
+    color: var(--cyan);
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .prizes-layout {
+    display: flex; gap: clamp(12px,3vw,24px); align-items: flex-end;
+  }
+
+  /* Thermometer */
+  .thermo-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    flex-shrink: 0; width: 36px;
+    position: relative;
   }
   .thermo-track {
     width: 14px;
-    flex: 1;
-    background: rgba(255,255,255,0.08);
-    border-radius: 999px;
+    height: clamp(240px,50vw,360px);
+    background: rgba(255,255,255,0.07);
+    border-radius: 8px;
     position: relative;
-    overflow: visible;
-    min-height: 300px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
   }
   .thermo-fill {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, var(--green), var(--neon), var(--purple));
-    border-radius: 999px;
-    transition: height 1.5s cubic-bezier(0.23,1,0.32,1);
+    position: absolute; bottom: 0; left: 0; right: 0;
+    background: linear-gradient(to top, #00ff9d, #00f5ff, #7b2fff);
+    border-radius: 8px;
+    transition: height 0.8s cubic-bezier(0.34,1.56,0.64,1);
     height: 0%;
   }
-  .thermo-fill::after {
-    content: '';
-    position: absolute; inset: 0;
-    background: linear-gradient(to top, transparent, rgba(255,255,255,0.2), transparent);
-    animation: shimmerV 2s linear infinite;
-  }
-  @keyframes shimmerV { from{transform:translateY(100%)} to{transform:translateY(-100%)} }
-
   .thermo-bulb {
-    width: 24px; height: 24px; border-radius: 50%;
-    background: linear-gradient(135deg, var(--green), var(--neon));
-    box-shadow: 0 0 12px var(--green);
-    margin-top: 6px; flex-shrink: 0;
-    transition: background 1s;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00ff9d, #00f5ff);
+    box-shadow: 0 0 16px rgba(0,255,157,0.6);
+    margin-top: 4px;
   }
 
-  /* Right: prize items */
-  .thermo-prizes-col {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 0;
-  }
-
-  .prize-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0 12px 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    position: relative;
-    transition: all 0.3s;
-  }
-  .prize-row:last-child { border-bottom: none; }
-
-  /* Connector dot to bar */
-  .prize-dot {
-    position: absolute;
-    left: -25px;
-    width: 10px; height: 10px; border-radius: 50%;
-    background: rgba(255,255,255,0.2);
-    border: 2px solid rgba(255,255,255,0.1);
-    transition: all 0.4s;
-    top: 50%; transform: translateY(-50%);
-  }
-  .prize-row.unlocked .prize-dot {
-    background: var(--green);
-    border-color: var(--green);
-    box-shadow: 0 0 8px var(--green);
-  }
-
-  .prize-icon-wrap {
-    width: 48px; height: 48px; border-radius: 14px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; flex-shrink: 0;
-    transition: all 0.4s;
-    position: relative; overflow: hidden;
-  }
-  .prize-row.unlocked .prize-icon-wrap {
-    background: rgba(0,255,157,0.1);
-    border-color: var(--green);
-    box-shadow: 0 0 16px rgba(0,255,157,0.2);
-  }
-  .prize-row.locked .prize-icon-wrap::after {
-    content: '🔒';
-    position: absolute; inset: 0;
-    background: rgba(6,6,20,0.6);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; backdrop-filter: blur(2px);
-    display: grid; place-items: center;
-  }
-
-  .prize-info { flex: 1; min-width: 0; }
-  .prize-name {
-    font-size: clamp(13px, 3.5vw, 15px); font-weight: 700;
-    transition: color 0.4s;
-  }
-  .prize-row.locked .prize-name { color: rgba(255,255,255,0.4); }
-  .prize-threshold {
-    font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 3px;
-    font-family: 'Orbitron', monospace;
-  }
-  .prize-row.unlocked .prize-threshold { color: var(--green); }
-
-  /* Mini progress inside each prize */
-  .prize-mini-bar {
-    width: 80px; flex-shrink: 0;
-  }
-  .prize-mini-track {
-    height: 5px; border-radius: 999px;
-    background: rgba(255,255,255,0.08); overflow: hidden;
-  }
-  .prize-mini-fill {
-    height: 100%; border-radius: 999px;
-    background: linear-gradient(90deg, var(--purple), var(--neon));
-    transition: width 1.5s cubic-bezier(0.23,1,0.32,1);
-  }
-  .prize-row.unlocked .prize-mini-fill { background: linear-gradient(90deg, var(--green), var(--neon)); }
-  .prize-mini-pct {
-    font-size: 10px; color: rgba(255,255,255,0.4);
-    text-align: right; margin-top: 3px;
-    font-family: 'Orbitron', monospace;
-  }
-  .prize-row.unlocked .prize-mini-pct { color: var(--green); }
-
-  .unlock-badge {
-    background: linear-gradient(135deg, var(--green), var(--neon));
-    color: #000; font-size: 10px; font-weight: 900; letter-spacing: 1px;
-    padding: 3px 10px; border-radius: 999px;
-    flex-shrink: 0; opacity: 0; transform: scale(0.7);
-    transition: all 0.4s;
-    white-space: nowrap;
-  }
-  .prize-row.unlocked .unlock-badge { opacity: 1; transform: scale(1); }
-
-  /* LEADERBOARD */
-  .lb-row {
+  /* Prize list */
+  .prize-list { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .prize-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    padding: clamp(8px,2vw,12px) clamp(10px,2.5vw,16px);
     display: flex; align-items: center; gap: 10px;
-    padding: 11px 8px; border-bottom: 1px solid rgba(255,255,255,0.06);
-    border-radius: 8px; transition: background 0.2s;
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
   }
-  .lb-row:hover { background: rgba(255,255,255,0.03); }
-  .lb-row:last-child { border-bottom: none; }
-  .lb-rank {
-    font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900;
-    width: 30px; text-align: center; flex-shrink: 0;
+  .prize-item.unlocked {
+    border-color: rgba(0,255,157,0.5);
+    box-shadow: 0 0 16px rgba(0,255,157,0.12);
+    background: rgba(0,255,157,0.05);
   }
-  .rank-1 { color: #FFD700; text-shadow: 0 0 12px #FFD700; }
-  .rank-2 { color: #C0C0C0; text-shadow: 0 0 12px #C0C0C0; }
-  .rank-3 { color: #CD7F32; text-shadow: 0 0 12px #CD7F32; }
-  .rank-other { color: rgba(255,255,255,0.4); font-size: 14px; }
-  .lb-avatar {
-    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; font-size: 17px;
+  .prize-icon {
+    font-size: clamp(18px,3.5vw,24px); flex-shrink: 0;
+    filter: grayscale(1) opacity(0.4);
+    transition: filter 0.3s;
   }
-  .lb-info { flex: 1; min-width: 0; }
-  .lb-name { font-size: clamp(13px, 3.5vw, 15px); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .lb-charge { font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 1px; }
-  .lb-pts {
-    font-family: 'Orbitron', monospace; font-size: clamp(13px, 3.5vw, 16px);
-    font-weight: 700; color: var(--gold); min-width: 60px; text-align: right; flex-shrink: 0;
+  .prize-item.unlocked .prize-icon { filter: none; }
+  .prize-body { flex: 1; min-width: 0; }
+  .prize-name {
+    font-size: clamp(11px,2.2vw,14px);
+    font-weight: 700;
+    color: rgba(224,232,255,0.6);
+    transition: color 0.3s;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .prize-item.unlocked .prize-name { color: #fff; }
+  .prize-pts {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(9px,1.8vw,11px);
+    color: rgba(224,232,255,0.3);
+    margin-top: 2px;
+  }
+  .prize-item.unlocked .prize-pts { color: var(--cyan); }
+  .prize-minibar {
+    width: clamp(40px,8vw,70px); flex-shrink: 0;
+  }
+  @media (max-width:600px) { .prize-minibar { display:none; } }
+  .minibar-track {
+    height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
+  }
+  .minibar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    border-radius: 2px;
+    transition: width 0.8s ease;
+    width: 0%;
+  }
+  .unlock-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(8px,1.5vw,10px);
+    background: var(--green);
+    color: #000;
+    padding: 2px 7px;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    opacity: 0;
+    transform: scale(0.8);
+    transition: opacity 0.3s, transform 0.3s;
+    flex-shrink: 0;
+  }
+  .prize-item.unlocked .unlock-badge { opacity: 1; transform: scale(1); }
+  .lock-overlay {
+    position: absolute; inset: 0;
+    background: rgba(6,6,20,0.45);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    transition: opacity 0.3s;
+    pointer-events: none;
+  }
+  .prize-item.unlocked .lock-overlay { opacity: 0; }
+
+  /* ── Leaderboard ── */
+  .lb-section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: clamp(16px,4vw,28px);
+    backdrop-filter: blur(12px);
+    margin-bottom: clamp(16px,3vw,24px);
+  }
+  .lb-table { width: 100%; border-collapse: collapse; }
+  .lb-table th {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(9px,1.8vw,11px);
+    color: rgba(224,232,255,0.35);
+    letter-spacing: 1.5px;
+    text-align: left;
+    padding: 0 8px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .lb-table th:last-child { text-align: right; }
+  .lb-row td {
+    padding: clamp(7px,1.5vw,10px) 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: clamp(12px,2.2vw,14px);
+    transition: background 0.2s;
+  }
+  .lb-row:last-child td { border-bottom: none; }
+  .lb-row.me td {
+    background: rgba(0,245,255,0.06);
+  }
+  .lb-row.me td:first-child {
+    border-left: 2px solid var(--cyan);
+  }
+  .rank-cell {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(12px,2.2vw,14px);
+    font-weight: 700;
+    width: 44px;
+  }
+  .rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.7); }
+  .rank-2 { color: #c0c0c0; }
+  .rank-3 { color: #cd7f32; }
+  .player-cell { display: flex; align-items: center; gap: 8px; }
+  .p-emoji { font-size: clamp(16px,3vw,20px); }
+  .p-phone { 
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(11px,2vw,13px);
+    letter-spacing: 1px;
+    color: rgba(224,232,255,0.75);
+  }
+  .me-tag {
+    font-size: clamp(9px,1.5vw,10px);
+    background: var(--cyan);
+    color: #000;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-family: 'Orbitron', sans-serif;
+  }
+  .score-cell {
+    text-align: right;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: clamp(13px,2.5vw,16px);
+    color: var(--gold);
+    text-shadow: 0 0 8px rgba(255,215,0,0.4);
   }
 
-  /* TOAST */
-  .toast {
-    position: fixed; bottom: 30px; left: 50%;
-    transform: translateX(-50%) translateY(120px);
-    background: linear-gradient(135deg, var(--purple), var(--pink));
-    padding: 12px 24px; border-radius: 999px; font-weight: 700;
-    font-size: clamp(13px, 3.5vw, 15px); z-index: 200;
-    transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
-    pointer-events: none; white-space: nowrap;
-    max-width: calc(100vw - 40px); text-align: center;
+  /* ── Toast ── */
+  #toast {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: linear-gradient(135deg, rgba(0,255,157,0.15), rgba(0,245,255,0.15));
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 13px;
+    color: var(--green);
+    letter-spacing: 1px;
+    z-index: 999;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    backdrop-filter: blur(12px);
   }
-  .toast.show { transform: translateX(-50%) translateY(0); }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-  /* UNLOCK BURST */
-  .burst { position: fixed; pointer-events: none; z-index: 300; font-size: 22px; animation: burstFly 1.2s ease-out forwards; }
-  @keyframes burstFly {
-    0%{opacity:1;transform:translate(0,0) scale(1)}
-    100%{opacity:0;transform:translate(var(--bx),var(--by)) scale(0)}
+  /* ── Stars ── */
+  .star {
+    position: fixed;
+    pointer-events: none;
+    z-index: 998;
+    font-size: 20px;
+    animation: starBurst 1s ease-out forwards;
+  }
+  @keyframes starBurst {
+    0% { transform: translate(0,0) scale(0); opacity: 1; }
+    100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
   }
 
-  @media (max-width: 600px) {
-    .card { padding: 16px; }
-    .thermo-bar-col { width: 28px; }
-    .thermo-track { min-height: 240px; }
-    .prize-dot { left: -19px; }
-    .prize-mini-bar { display: none; }
-    .prize-row { padding-left: 12px; }
-    .prize-icon-wrap { width: 42px; height: 42px; font-size: 20px; border-radius: 12px; }
+  /* ── Error state ── */
+  .error-msg {
+    display: none;
+    color: var(--pink);
+    font-size: clamp(12px,2vw,13px);
+    margin-top: 10px;
+    font-family: 'Orbitron', sans-serif;
+    letter-spacing: 1px;
+    animation: shake 0.3s ease;
+  }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
   }
 </style>
 </head>
 <body>
-<div class="bg-grid"></div>
-<div class="orbs"><div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div></div>
 
-<div class="wrapper">
+<div class="bg-glow"></div>
+<div class="grid-bg"></div>
+
+<div class="container">
+
+  <!-- Header -->
   <header>
-    <div class="event-badge">限時活動進行中</div>
+    <div class="badge"><span class="badge-dot"></span>限時活動進行中</div>
     <h1>充電嗨翻天</h1>
-    <p class="subtitle">每次充電 · 累積積分 · 達標即得獎</p>
-    <div class="countdown-wrap">
-      <div class="countdown-box"><span class="countdown-num" id="cd-d">07</span><div class="countdown-label">天</div></div>
-      <div class="countdown-box"><span class="countdown-num" id="cd-h">14</span><div class="countdown-label">時</div></div>
-      <div class="countdown-box"><span class="countdown-num" id="cd-m">32</span><div class="countdown-label">分</div></div>
-      <div class="countdown-box"><span class="countdown-num" id="cd-s">09</span><div class="countdown-label">秒</div></div>
+    <p class="subtitle">每次充電 · <span>累積積分</span> · 達標即得獎</p>
+    <div class="countdown">
+      <div class="cd-unit"><span class="cd-num" id="cd-d">00</span><div class="cd-label">天</div></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-h">00</span><div class="cd-label">時</div></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-m">00</span><div class="cd-label">分</div></div>
+      <div class="cd-unit"><span class="cd-num" id="cd-s">00</span><div class="cd-label">秒</div></div>
     </div>
   </header>
 
-  <!-- MY POINTS -->
-  <div class="card">
-    <div class="card-title">👤 我的帳戶</div>
-    <div class="user-info">
-      <div class="avatar">🦸</div>
-      <div>
-        <div class="user-name">陳大充</div>
-        <div class="user-rank" id="myRankTxt">目前排行第 3 名</div>
+  <!-- Search -->
+  <div class="search-card">
+    <div class="search-title">🔍 輸入手機號碼查詢積分</div>
+    <div class="search-row">
+      <input class="search-input" id="phone-input" type="tel" placeholder="09XXXXXXXX" maxlength="10">
+      <button class="search-btn" onclick="doSearch()">查詢</button>
+    </div>
+    <div class="error-msg" id="error-msg">⚠ 查無此號碼，請確認後重新輸入</div>
+  </div>
+
+  <!-- Account Card -->
+  <div id="account-card">
+    <div class="account-top">
+      <div class="avatar" id="user-emoji">⚡</div>
+      <div class="account-info">
+        <div class="account-name" id="user-phone">09XXXXXXXX</div>
+        <div class="account-rank">目前排名：<span id="user-rank">#1</span> / 28,291 人</div>
       </div>
     </div>
-    <div class="pts-big">
-      <div class="pts-num" id="myPoints">2,480</div>
-      <div class="pts-label">我的積分</div>
+    <div class="score-display">
+      <span class="score-num" id="user-score">0</span>
+      <div class="score-label">TOTAL POINTS</div>
     </div>
   </div>
 
-  <!-- THERMOMETER PRIZES -->
-  <div class="card">
-    <div class="card-title">🏆 獎品進度 — 達標即解鎖</div>
-    <div class="thermo-wrap">
-      <!-- Bar -->
-      <div class="thermo-bar-col">
+  <!-- Prizes -->
+  <div class="prizes-section" id="prizes-section">
+    <div class="section-title">🏆 獎品解鎖進度</div>
+    <div class="prizes-layout">
+      <div class="thermo-wrap">
         <div class="thermo-track">
-          <div class="thermo-fill" id="thermoFill"></div>
-          <!-- dots will be injected by JS -->
+          <div class="thermo-fill" id="thermo-fill"></div>
         </div>
-        <div class="thermo-bulb" id="thermoBulb"></div>
+        <div class="thermo-bulb"></div>
       </div>
-      <!-- Prizes -->
-      <div class="thermo-prizes-col" id="prizeList"></div>
+      <div class="prize-list" id="prize-list"></div>
     </div>
   </div>
 
-  <!-- LEADERBOARD -->
-  <div class="card">
-    <div class="card-title">🏅 即時排行榜 <span style="margin-left:auto;font-size:10px;color:rgba(255,255,255,0.3)">每5秒更新</span></div>
-    <div id="leaderboard"></div>
+  <!-- Leaderboard -->
+  <div class="lb-section">
+    <div class="section-title">⚡ 即時排行榜</div>
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th>排名</th>
+          <th>玩家</th>
+          <th style="text-align:right">積分</th>
+        </tr>
+      </thead>
+      <tbody id="lb-body"></tbody>
+    </table>
   </div>
+
 </div>
 
-<div class="toast" id="toast"></div>
+<div id="toast">🎉 獎品解鎖！</div>
 
 <script>
-var myPts = 2480;
+// ── Real Data ──
+const ALL_DATA = ALL_DATA_PLACEHOLDER;
+const LEADERBOARD = LEADERBOARD_PLACEHOLDER;
 
-var prizes = [
-  { name: '咖啡兌換券', icon: '☕', threshold: 500 },
-  { name: '九折優惠碼', icon: '🏷️', threshold: 1000 },
-  { name: '電影票', icon: '🎬', threshold: 2000 },
-  { name: '抽獎機會', icon: '🎰', threshold: 3000 },
-  { name: '藍牙耳機', icon: '🎧', threshold: 5000 },
-  { name: 'iPad', icon: '📱', threshold: 8000 },
+const PRIZES = [
+  { icon:'☕', name:'咖啡兌換券',   pts: 200 },
+  { icon:'🏷️', name:'九折優惠碼',   pts: 400 },
+  { icon:'🎬', name:'電影票',       pts: 600 },
+  { icon:'🎰', name:'抽獎機會',     pts: 800 },
+  { icon:'🎧', name:'藍牙耳機',     pts:1000 },
+  { icon:'📱', name:'iPad',         pts:1400 },
 ];
 
-var players = [
-  { name: '王閃電', emoji: '⚡', charges: 142, pts: 14200, color: 'linear-gradient(135deg,#FFD700,#FF8C00)' },
-  { name: '李大充', emoji: '🔥', charges: 98, pts: 9800, color: 'linear-gradient(135deg,#ff2d78,#7b2fff)' },
-  { name: '陳大充', emoji: '🦸', charges: 69, pts: 6900, color: 'linear-gradient(135deg,#00f5ff,#7b2fff)', isMe: true },
-  { name: '林冠宇', emoji: '💎', charges: 55, pts: 5500, color: 'linear-gradient(135deg,#a78bfa,#6d28d9)' },
-  { name: '張美美', emoji: '🌟', charges: 48, pts: 4800, color: 'linear-gradient(135deg,#f472b6,#ec4899)' },
-  { name: '黃超速', emoji: '🚀', charges: 42, pts: 4200, color: 'linear-gradient(135deg,#34d399,#059669)' },
-  { name: '劉精準', emoji: '🎯', charges: 36, pts: 3600, color: 'linear-gradient(135deg,#fbbf24,#d97706)' },
-  { name: '周飛飛', emoji: '🦋', charges: 29, pts: 2900, color: 'linear-gradient(135deg,#a5f3fc,#0891b2)' },
-];
+const EMOJIS = ['🦁','🐯','🦊','🐼','🦄','🐉','🦋','🌟','🔥','⚡','🎯','🏆','💎','🚀','🌈','🦅','🎸','🌙','⭐','🎪'];
+const END_DATE = new Date('2025-12-31T23:59:59');
 
-var maxThreshold = prizes[prizes.length - 1].threshold;
-var prevUnlocked = [];
+let currentPhone = null;
 
-/* Build prize list once */
-function buildPrizes() {
-  var col = document.getElementById('prizeList');
-  var track = document.querySelector('.thermo-track');
-  col.innerHTML = '';
+// ── Countdown ──
+function updateCountdown() {
+  const diff = END_DATE - new Date();
+  if (diff <= 0) { ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent='00'); return; }
+  const d = Math.floor(diff/86400000);
+  const h = Math.floor((diff%86400000)/3600000);
+  const m = Math.floor((diff%3600000)/60000);
+  const s = Math.floor((diff%60000)/1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
 
-  prizes.forEach(function(p, i) {
-    var pct = p.threshold / maxThreshold * 100;
-
-    // Dot on the bar
-    var dot = document.createElement('div');
-    dot.className = 'prize-dot-bar';
-    dot.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%);bottom:' + pct + '%;width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.1);transition:all 0.4s;z-index:2;';
-    dot.id = 'bdot-' + i;
-    track.appendChild(dot);
-
-    var row = document.createElement('div');
-    row.className = 'prize-row locked';
-    row.id = 'prize-' + i;
-
-    var connPct = (myPts / maxThreshold) * 100;
-    var itemPct = Math.min(Math.round(myPts / p.threshold * 100), 100);
-    var unlocked = myPts >= p.threshold;
-    if (unlocked) row.classList.replace('locked','unlocked');
-
-    row.innerHTML =
-      '<div class="prize-dot"></div>' +
-      '<div class="prize-icon-wrap">' + p.icon + '</div>' +
-      '<div class="prize-info">' +
-        '<div class="prize-name">' + p.name + '</div>' +
-        '<div class="prize-threshold">' + p.threshold.toLocaleString() + ' pts</div>' +
-      '</div>' +
-      '<div class="prize-mini-bar">' +
-        '<div class="prize-mini-track"><div class="prize-mini-fill" id="mf-' + i + '" style="width:0%"></div></div>' +
-        '<div class="prize-mini-pct" id="mp-' + i + '">0%</div>' +
-      '</div>' +
-      '<div class="unlock-badge">UNLOCKED</div>';
-
-    col.appendChild(row);
-    if (unlocked) prevUnlocked.push(i);
+// ── Leaderboard ──
+function renderLeaderboard(highlightPhone) {
+  const medals = ['👑','🥈','🥉'];
+  const tbody = document.getElementById('lb-body');
+  tbody.innerHTML = '';
+  LEADERBOARD.forEach((p, i) => {
+    const isMe = highlightPhone && p.phone === highlightPhone;
+    const rankDisplay = i < 3 ? medals[i] : p.rank;
+    const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
+    const maskedPhone = p.phone.slice(0,4) + '****' + p.phone.slice(-3);
+    tbody.innerHTML += `
+      <tr class="lb-row ${isMe?'me':''}">
+        <td class="rank-cell ${rankClass}">${rankDisplay}</td>
+        <td>
+          <div class="player-cell">
+            <span class="p-emoji">${p.emoji}</span>
+            <span class="p-phone">${isMe ? p.phone : maskedPhone}</span>
+            ${isMe ? '<span class="me-tag">我</span>' : ''}
+          </div>
+        </td>
+        <td class="score-cell">${p.score.toLocaleString()}</td>
+      </tr>`;
   });
 }
+renderLeaderboard(null);
 
-function updateThermo() {
-  var pct = Math.min(myPts / maxThreshold * 100, 100);
-  document.getElementById('thermoFill').style.height = pct + '%';
+// ── Search ──
+function doSearch() {
+  const raw = document.getElementById('phone-input').value.trim();
+  const phone = raw.startsWith('0') ? raw : '0'+raw;
+  const err = document.getElementById('error-msg');
 
-  prizes.forEach(function(p, i) {
-    var row = document.getElementById('prize-' + i);
-    var wasUnlocked = row.classList.contains('unlocked');
-    var nowUnlocked = myPts >= p.threshold;
-    var itemPct = Math.min(Math.round(myPts / p.threshold * 100), 100);
+  if (!ALL_DATA[phone]) {
+    err.style.display = 'block';
+    document.getElementById('account-card').style.display = 'none';
+    document.getElementById('prizes-section').classList.remove('visible');
+    void err.offsetWidth; // re-trigger animation
+    err.style.animation = 'none';
+    requestAnimationFrame(() => { err.style.animation = ''; });
+    return;
+  }
+  err.style.display = 'none';
+  currentPhone = phone;
 
-    if (nowUnlocked && !wasUnlocked) {
-      row.classList.replace('locked', 'unlocked');
-      burstEffect(row);
-      showToast(p.icon + ' 解鎖「' + p.name + '」！恭喜！');
-    } else if (!nowUnlocked && wasUnlocked) {
-      row.classList.replace('unlocked', 'locked');
-    }
+  const { rank, score } = ALL_DATA[phone];
+  const emojiIdx = (parseInt(phone.slice(-2)) || 0) % EMOJIS.length;
 
-    var mf = document.getElementById('mf-' + i);
-    var mp = document.getElementById('mp-' + i);
-    if (mf) mf.style.width = itemPct + '%';
-    if (mp) mp.textContent = itemPct + '%';
+  document.getElementById('user-emoji').textContent = EMOJIS[emojiIdx];
+  document.getElementById('user-phone').textContent = phone;
+  document.getElementById('user-rank').textContent = '#' + rank.toLocaleString();
+  document.getElementById('user-score').textContent = score.toLocaleString();
 
-    // Update bar dot
-    var bdot = document.getElementById('bdot-' + i);
-    if (bdot) {
-      if (nowUnlocked) {
-        bdot.style.background = 'var(--green)';
-        bdot.style.borderColor = 'var(--green)';
-        bdot.style.boxShadow = '0 0 8px var(--green)';
-      } else {
-        bdot.style.background = '';
-        bdot.style.borderColor = '';
-        bdot.style.boxShadow = '';
-      }
-    }
-  });
+  document.getElementById('account-card').style.display = 'block';
+  document.getElementById('prizes-section').classList.add('visible');
+
+  renderPrizes(score);
+  renderLeaderboard(phone);
+
+  // Scroll to account card
+  document.getElementById('account-card').scrollIntoView({ behavior:'smooth', block:'center' });
 }
 
-function burstEffect(el) {
-  var r = el.getBoundingClientRect();
-  var emojis = ['✨','🌟','🎉','⭐','💫'];
-  for (var i = 0; i < 10; i++) {
-    var b = document.createElement('div');
-    b.className = 'burst';
-    b.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    var bx = (Math.random() - 0.5) * 220;
-    var by = -(Math.random() * 160 + 40);
-    b.style.cssText = 'left:' + (r.left + r.width/2) + 'px;top:' + (r.top + r.height/2) + 'px;--bx:' + bx + 'px;--by:' + by + 'px;animation-delay:' + (Math.random()*0.3) + 's';
-    document.body.appendChild(b);
-    setTimeout(function(){ if(b.parentNode) b.parentNode.removeChild(b); }, 1500);
+document.getElementById('phone-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doSearch();
+});
+
+// ── Prizes ──
+function renderPrizes(score) {
+  const maxPts = PRIZES[PRIZES.length-1].pts;
+  const pct = Math.min(100, (score / maxPts) * 100);
+  document.getElementById('thermo-fill').style.height = pct + '%';
+
+  const list = document.getElementById('prize-list');
+  list.innerHTML = '';
+  const unlockedItems = [];
+
+  [...PRIZES].reverse().forEach(p => {
+    const unlocked = score >= p.pts;
+    const miniPct = Math.min(100, Math.round((score / p.pts) * 100));
+    if (unlocked) unlockedItems.push(p);
+    list.innerHTML += `
+      <div class="prize-item ${unlocked?'unlocked':''}">
+        <div class="prize-icon">${p.icon}</div>
+        <div class="prize-body">
+          <div class="prize-name">${p.name}</div>
+          <div class="prize-pts">${p.pts.toLocaleString()} pts</div>
+        </div>
+        <div class="prize-minibar">
+          <div class="minibar-track">
+            <div class="minibar-fill" style="width:${miniPct}%"></div>
+          </div>
+        </div>
+        <div class="unlock-badge">UNLOCKED</div>
+        ${!unlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+      </div>`;
+  });
+
+  if (unlockedItems.length > 0) {
+    setTimeout(() => {
+      showToast(`🎉 已解鎖 ${unlockedItems.length} 項獎品！`);
+      burst(window.innerWidth/2, window.innerHeight/2);
+    }, 600);
   }
 }
 
-function renderLeaderboard() {
-  var lb = document.getElementById('leaderboard');
-  lb.innerHTML = '';
-  var sorted = players.slice().sort(function(a,b){ return b.pts - a.pts; });
-  sorted.forEach(function(p, i) {
-    var rank = i + 1;
-    var rankClass = rank <= 3 ? 'rank-' + rank : 'rank-other';
-    var rankEmoji = rank === 1 ? '👑' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : rank;
-    var rowStyle = p.isMe ? 'background:rgba(0,245,255,0.05);border-left:3px solid var(--neon);border-radius:12px;' : '';
-    var meTag = p.isMe ? ' <span style="font-size:10px;color:var(--neon);background:rgba(0,245,255,0.1);padding:2px 7px;border-radius:999px;">我</span>' : '';
-    lb.innerHTML += '<div class="lb-row" style="' + rowStyle + '">'
-      + '<div class="lb-rank ' + rankClass + '">' + rankEmoji + '</div>'
-      + '<div class="lb-avatar" style="background:' + p.color + '">' + p.emoji + '</div>'
-      + '<div class="lb-info"><div class="lb-name">' + p.name + meTag + '</div>'
-      + '<div class="lb-charge">充電 ' + p.charges + ' 次</div></div>'
-      + '<div class="lb-pts">' + p.pts.toLocaleString() + '</div></div>';
-  });
-  var myRank = sorted.findIndex(function(p){ return p.isMe; }) + 1;
-  document.getElementById('myRankTxt').textContent = '目前排行第 ' + myRank + ' 名';
-}
-
+// ── Toast ──
 function showToast(msg) {
-  var t = document.getElementById('toast');
+  const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(function(){ t.classList.remove('show'); }, 3000);
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-var endDate = new Date(Date.now() + 7*86400000 + 14*3600000 + 32*60000);
-function updateCountdown() {
-  var diff = endDate - Date.now();
-  if (diff <= 0) return;
-  document.getElementById('cd-d').textContent = String(Math.floor(diff/86400000)).padStart(2,'0');
-  document.getElementById('cd-h').textContent = String(Math.floor(diff%86400000/3600000)).padStart(2,'0');
-  document.getElementById('cd-m').textContent = String(Math.floor(diff%3600000/60000)).padStart(2,'0');
-  document.getElementById('cd-s').textContent = String(Math.floor(diff%60000/1000)).padStart(2,'0');
+// ── Star burst ──
+function burst(x, y) {
+  const symbols = ['⭐','✨','💥','🌟','💫','⚡'];
+  for (let i = 0; i < 12; i++) {
+    const el = document.createElement('div');
+    el.className = 'star';
+    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
+    const angle = (i/12)*360;
+    const dist = 80 + Math.random()*80;
+    el.style.setProperty('--dx', Math.cos(angle*Math.PI/180)*dist+'px');
+    el.style.setProperty('--dy', Math.sin(angle*Math.PI/180)*dist+'px');
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1000);
+  }
 }
-
-function liveUpdate() {
-  var nonMe = players.filter(function(p){ return !p.isMe; });
-  var pick = nonMe[Math.floor(Math.random() * nonMe.length)];
-  pick.pts += Math.floor(Math.random() * 3 + 1) * 100;
-  pick.charges += 1;
-  renderLeaderboard();
-}
-
-// Simulate MY points increasing (demo mode)
-function simMyPts() {
-  myPts += Math.floor(Math.random() * 200 + 100);
-  var meIdx = players.findIndex(function(p){ return p.isMe; });
-  players[meIdx].pts = myPts;
-  players[meIdx].charges += 1;
-  document.getElementById('myPoints').textContent = myPts.toLocaleString();
-  updateThermo();
-  renderLeaderboard();
-}
-
-buildPrizes();
-renderLeaderboard();
-updateCountdown();
-setTimeout(function(){ updateThermo(); }, 200);
-
-setInterval(updateCountdown, 1000);
-setInterval(liveUpdate, 5000);
-setInterval(simMyPts, 8000);  // demo: auto increment to show unlock animation
 </script>
 </body>
 </html>
