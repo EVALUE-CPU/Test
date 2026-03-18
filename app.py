@@ -300,45 +300,77 @@ hr { border-color: #1e3a5f !important; }
 
 
 # ─────────────────────────────────────────────
-# 溫度計 HTML（純 HTML 渲染）
+# 溫度計 HTML（全用 inline style，避免 Streamlit 壓縮 HTML 導致 class 失效）
 # ─────────────────────────────────────────────
 def render_thermometer(user_score, prize_counts):
     capped = min(user_score, MAX_SCORE)
-    pct = capped / MAX_SCORE * 100  # 0~100
+    pct = capped / MAX_SCORE * 100
 
-    # 管子高度固定為 len(PRIZES)*46 px
     tube_h = len(PRIZES) * 46
 
-    # 產生獎品列
-    prize_rows_html = ""
-    for p in reversed(PRIZES):  # 由小到大排列（底部最低門檻）
-        unlocked = user_score >= p["score"]
-        cls = "prize-row unlocked" if unlocked else "prize-row"
-        count = prize_counts.get(p["score"], 0)
-        lock = "🔓" if unlocked else "🔒"
-        prize_rows_html += f"""
-        <div class="{cls}">
-            <div class="prize-dot"></div>
-            <span class="prize-score">{p['score']:,}</span>
-            <span class="prize-emoji">{p['emoji']}</span>
-            <span class="prize-name">{p['name']}</span>
-            <span class="prize-count">{count} 人達標</span>
-            <span class="lock-icon">{lock}</span>
-        </div>"""
+    ROW_BASE = (
+        "display:flex;align-items:center;gap:8px;"
+        "border-radius:10px;padding:7px 12px;"
+        "margin-bottom:6px;border:1px solid #1e3a5f;"
+        "background:#111827;"
+    )
+    ROW_UNLOCKED = (
+        "display:flex;align-items:center;gap:8px;"
+        "border-radius:10px;padding:7px 12px;"
+        "margin-bottom:6px;border:1px solid #00d4ff;"
+        "background:linear-gradient(90deg,rgba(0,212,255,.08),rgba(123,47,247,.08));"
+        "box-shadow:0 0 10px rgba(0,212,255,.15);"
+    )
+    DOT_BASE     = "width:10px;height:10px;border-radius:50%;background:#1e3a5f;flex-shrink:0;"
+    DOT_UNLOCKED = "width:10px;height:10px;border-radius:50%;background:#00d4ff;box-shadow:0 0 6px #00d4ff;flex-shrink:0;"
+    SCORE_BASE     = "font-family:monospace;font-size:.72rem;color:#4a7fa8;min-width:44px;"
+    SCORE_UNLOCKED = "font-family:monospace;font-size:.72rem;color:#00d4ff;min-width:44px;"
+    NAME_BASE      = "font-size:.82rem;font-weight:700;color:#7ec8e3;flex:1;"
+    NAME_UNLOCKED  = "font-size:.82rem;font-weight:700;color:#e8f4fd;flex:1;"
+    COUNT_BASE     = "font-family:monospace;font-size:.68rem;color:#4a7fa8;white-space:nowrap;"
+    COUNT_UNLOCKED = "font-family:monospace;font-size:.68rem;color:#7ec8e3;white-space:nowrap;"
 
-    html = f"""
-<div class="thermo-wrap">
-    <div class="thermo-tube">
-        <div class="thermo-bg" style="height:{tube_h}px;">
-            <div class="thermo-fill" style="height:{pct}%;"></div>
-        </div>
-        <div class="thermo-bulb"></div>
-    </div>
-    <div class="prize-list">
-        {prize_rows_html}
-    </div>
-</div>
-"""
+    prize_rows_html = ""
+    for p in reversed(PRIZES):
+        unlocked = user_score >= p["score"]
+        count = prize_counts.get(p["score"], 0)
+        if unlocked:
+            row_s, dot_s, score_s, name_s, count_s, lock_icon = (
+                ROW_UNLOCKED, DOT_UNLOCKED, SCORE_UNLOCKED,
+                NAME_UNLOCKED, COUNT_UNLOCKED, "🔓"
+            )
+        else:
+            row_s, dot_s, score_s, name_s, count_s, lock_icon = (
+                ROW_BASE, DOT_BASE, SCORE_BASE,
+                NAME_BASE, COUNT_BASE, "🔒"
+            )
+        prize_rows_html += (
+            f'<div style="{row_s}">' +
+            f'<div style="{dot_s}"></div>' +
+            f'<span style="{score_s}">{p["score"]:,}</span>' +
+            f'<span style="font-size:1rem;">{p["emoji"]}</span>' +
+            f'<span style="{name_s}">{p["name"]}</span>' +
+            f'<span style="{count_s}">{count} 人達標</span>' +
+            f'<span style="font-size:.75rem;">{lock_icon}</span>' +
+            '</div>'
+        )
+
+    html = (
+        '<div style="display:flex;gap:20px;align-items:flex-start;margin:12px 0;">' +
+        '<div style="flex:0 0 44px;display:flex;flex-direction:column;align-items:center;">' +
+        f'<div style="width:22px;background:#1a2540;border-radius:11px 11px 0 0;' +
+        f'border:2px solid #1e3a5f;position:relative;overflow:hidden;height:{tube_h}px;">' +
+        f'<div style="position:absolute;bottom:0;left:0;right:0;height:{pct:.1f}%;' +
+        f'background:linear-gradient(to top,#ff6b35,#7b2ff7,#00d4ff);"></div>' +
+        '</div>' +
+        '<div style="width:36px;height:36px;' +
+        'background:radial-gradient(circle at 40% 40%,#ff6b35,#c0392b);' +
+        'border-radius:50%;border:3px solid #1e3a5f;margin-top:-2px;flex-shrink:0;' +
+        'box-shadow:0 0 12px rgba(255,107,53,.5);"></div>' +
+        '</div>' +
+        f'<div style="flex:1;">{prize_rows_html}</div>' +
+        '</div>'
+    )
     st.markdown(html, unsafe_allow_html=True)
 
 
