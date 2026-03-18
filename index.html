@@ -26,9 +26,7 @@
   }
 
   /* ── Background ── */
-  .bg-glow {
-    position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  }
+  .bg-glow { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
   .bg-glow::before {
     content: '';
     position: absolute; top: -20%; left: -10%;
@@ -43,8 +41,8 @@
     background: radial-gradient(circle, rgba(0,245,255,0.12) 0%, transparent 70%);
     animation: drift2 15s ease-in-out infinite alternate;
   }
-  @keyframes drift1 { from {transform:translate(0,0)} to {transform:translate(5vw,8vh)} }
-  @keyframes drift2 { from {transform:translate(0,0)} to {transform:translate(-4vw,-6vh)} }
+  @keyframes drift1 { from{transform:translate(0,0)} to{transform:translate(5vw,8vh)} }
+  @keyframes drift2 { from{transform:translate(0,0)} to{transform:translate(-4vw,-6vh)} }
 
   .grid-bg {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -61,446 +59,307 @@
   }
 
   /* ── Header ── */
-  header {
-    text-align: center;
-    padding: clamp(24px,5vw,48px) 0 clamp(16px,3vw,28px);
-  }
+  header { text-align: center; padding: clamp(24px,5vw,48px) 0 clamp(16px,3vw,28px); }
   .badge {
     display: inline-flex; align-items: center; gap: 6px;
     background: rgba(255,45,120,0.15);
     border: 1px solid rgba(255,45,120,0.5);
-    border-radius: 20px;
-    padding: 4px 14px;
+    border-radius: 20px; padding: 4px 14px;
     font-size: clamp(10px,2vw,12px);
     font-family: 'Orbitron', sans-serif;
-    color: var(--pink);
-    letter-spacing: 1px;
-    margin-bottom: 16px;
+    color: var(--pink); letter-spacing: 1px; margin-bottom: 16px;
   }
   .badge-dot {
     width: 7px; height: 7px;
-    background: var(--pink);
-    border-radius: 50%;
-    animation: pulse 1.5s infinite;
+    background: var(--pink); border-radius: 50%;
+    animation: pulse-dot 1.5s infinite;
   }
-  @keyframes pulse {
+  @keyframes pulse-dot {
     0%,100% { opacity:1; transform:scale(1); }
     50% { opacity:0.4; transform:scale(0.6); }
   }
   h1 {
     font-family: 'Orbitron', sans-serif;
-    font-size: clamp(28px,7vw,56px);
-    font-weight: 900;
+    font-size: clamp(28px,7vw,56px); font-weight: 900;
     background: linear-gradient(135deg, var(--cyan) 0%, var(--purple) 60%, var(--pink) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    line-height: 1.1;
-    letter-spacing: -1px;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    line-height: 1.1; letter-spacing: -1px;
   }
   .subtitle {
-    font-size: clamp(12px,2.5vw,15px);
-    color: rgba(224,232,255,0.55);
-    margin-top: 10px;
-    letter-spacing: 2px;
+    font-size: clamp(12px,2.5vw,15px); color: rgba(224,232,255,0.55);
+    margin-top: 10px; letter-spacing: 2px;
   }
   .subtitle span { color: var(--cyan); }
 
   /* ── Countdown ── */
-  .countdown {
-    display: flex; justify-content: center; gap: clamp(8px,2vw,16px);
-    margin-top: clamp(14px,3vw,24px);
-  }
+  .countdown { display: flex; justify-content: center; gap: clamp(8px,2vw,16px); margin-top: clamp(14px,3vw,24px); }
   .cd-unit {
-    text-align: center;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: clamp(6px,1.5vw,10px) clamp(10px,2.5vw,18px);
-    min-width: clamp(50px,12vw,70px);
-    backdrop-filter: blur(8px);
+    text-align: center; background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: clamp(6px,1.5vw,10px) clamp(10px,2.5vw,18px);
+    min-width: clamp(50px,12vw,70px); backdrop-filter: blur(8px);
   }
   .cd-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(18px,4vw,28px);
-    font-weight: 700;
-    color: var(--cyan);
-    text-shadow: 0 0 12px rgba(0,245,255,0.7);
-    display: block;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(18px,4vw,28px); font-weight: 700;
+    color: var(--cyan); text-shadow: 0 0 12px rgba(0,245,255,0.7); display: block;
   }
-  .cd-label {
-    font-size: clamp(9px,1.8vw,11px);
-    color: rgba(224,232,255,0.4);
-    letter-spacing: 1px;
-    margin-top: 2px;
-  }
+  .cd-label { font-size: clamp(9px,1.8vw,11px); color: rgba(224,232,255,0.4); letter-spacing: 1px; margin-top: 2px; }
 
   /* ── Search ── */
   .search-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: clamp(16px,4vw,28px);
-    backdrop-filter: blur(12px);
-    margin-bottom: clamp(16px,3vw,24px);
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: clamp(16px,4vw,28px); backdrop-filter: blur(12px); margin-bottom: clamp(16px,3vw,24px);
   }
-  .search-title {
-    font-size: clamp(13px,2.5vw,15px);
-    color: rgba(224,232,255,0.6);
-    margin-bottom: 12px;
-    letter-spacing: 1px;
-  }
-  .search-row {
-    display: flex; gap: 10px;
-  }
+  .search-title { font-size: clamp(13px,2.5vw,15px); color: rgba(224,232,255,0.6); margin-bottom: 12px; letter-spacing: 1px; }
+  .search-row { display: flex; gap: 10px; }
   .search-input {
-    flex: 1;
-    background: rgba(0,0,0,0.35);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 16px;
-    color: #fff;
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(13px,2.5vw,16px);
-    letter-spacing: 2px;
-    outline: none;
+    flex: 1; background: rgba(0,0,0,0.35); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 16px; color: #fff; font-family: 'Orbitron', sans-serif;
+    font-size: clamp(13px,2.5vw,16px); letter-spacing: 2px; outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .search-input:focus {
-    border-color: var(--cyan);
-    box-shadow: 0 0 16px rgba(0,245,255,0.2);
-  }
+  .search-input:focus { border-color: var(--cyan); box-shadow: 0 0 16px rgba(0,245,255,0.2); }
   .search-input::placeholder { color: rgba(255,255,255,0.2); letter-spacing: 1px; }
   .search-btn {
-    background: linear-gradient(135deg, var(--cyan), var(--purple));
-    border: none;
-    border-radius: 10px;
-    padding: 12px 22px;
-    color: #000;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(12px,2vw,14px);
-    cursor: pointer;
-    transition: transform 0.15s, box-shadow 0.15s;
-    white-space: nowrap;
+    background: linear-gradient(135deg, var(--cyan), var(--purple)); border: none; border-radius: 10px;
+    padding: 12px 22px; color: #000; font-family: 'Orbitron', sans-serif; font-weight: 700;
+    font-size: clamp(12px,2vw,14px); cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; white-space: nowrap;
   }
-  .search-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(0,245,255,0.35);
-  }
+  .search-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,245,255,0.35); }
   .search-btn:active { transform: translateY(0); }
+  .error-msg {
+    display: none; color: var(--pink); font-size: clamp(12px,2vw,13px); margin-top: 10px;
+    font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+  }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 
   /* ── Account Card ── */
   #account-card {
-    display: none;
-    background: var(--card);
-    border: 1px solid rgba(0,245,255,0.35);
-    border-radius: 16px;
-    padding: clamp(16px,4vw,28px);
-    backdrop-filter: blur(12px);
-    margin-bottom: clamp(16px,3vw,24px);
-    animation: fadeUp 0.4s ease;
+    display: none; background: var(--card); border: 1px solid rgba(0,245,255,0.35);
+    border-radius: 16px; padding: clamp(16px,4vw,28px); backdrop-filter: blur(12px);
+    margin-bottom: clamp(16px,3vw,24px); animation: fadeUp 0.4s ease;
   }
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(16px); }
-    to { opacity:1; transform:translateY(0); }
-  }
-  .account-top {
-    display: flex; align-items: center; gap: 16px; margin-bottom: 20px;
-  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+  .account-top { display: flex; align-items: center; gap: 16px; margin-bottom: 20px; }
   .avatar {
-    font-size: clamp(30px,6vw,42px);
-    width: clamp(52px,10vw,64px); height: clamp(52px,10vw,64px);
-    background: rgba(0,245,255,0.08);
-    border: 2px solid rgba(0,245,255,0.3);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
+    font-size: clamp(28px,5.5vw,40px); width: clamp(52px,10vw,64px); height: clamp(52px,10vw,64px);
+    background: rgba(0,245,255,0.08); border: 2px solid rgba(0,245,255,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   }
   .account-info { flex: 1; }
-  .account-name {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(13px,2.5vw,16px);
-    color: #fff;
-    letter-spacing: 2px;
-    margin-bottom: 4px;
-  }
-  .account-rank {
-    font-size: clamp(11px,2vw,13px);
-    color: rgba(224,232,255,0.5);
-  }
-  .account-rank span {
-    color: var(--gold);
-    font-weight: 700;
-    font-family: 'Orbitron', sans-serif;
-  }
-  .score-display {
-    text-align: center;
-    margin-bottom: 8px;
-  }
+  .account-name { font-family: 'Orbitron', sans-serif; font-size: clamp(13px,2.5vw,16px); color: #fff; letter-spacing: 2px; margin-bottom: 4px; }
+  .account-rank { font-size: clamp(11px,2vw,13px); color: rgba(224,232,255,0.5); }
+  .account-rank span { color: var(--gold); font-weight: 700; font-family: 'Orbitron', sans-serif; }
+  .score-display { text-align: center; }
   .score-num {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(44px,10vw,72px);
-    font-weight: 900;
-    color: var(--cyan);
-    text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(0,245,255,0.4);
-    line-height: 1;
-    display: block;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(44px,10vw,72px); font-weight: 900;
+    color: var(--cyan); text-shadow: 0 0 30px rgba(0,245,255,0.8), 0 0 60px rgba(0,245,255,0.4);
+    line-height: 1; display: block;
   }
-  .score-label {
-    font-size: clamp(11px,2vw,13px);
-    color: rgba(224,232,255,0.4);
-    letter-spacing: 3px;
-    margin-top: 4px;
-  }
+  .score-label { font-size: clamp(11px,2vw,13px); color: rgba(224,232,255,0.4); letter-spacing: 3px; margin-top: 4px; }
 
-  /* ── Thermometer / Prizes ── */
+  /* ══════════════════════════════════════════════
+     🌡️  THERMOMETER + PRIZES
+     ══════════════════════════════════════════════ */
   .prizes-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: clamp(16px,4vw,28px);
-    backdrop-filter: blur(12px);
+    display: none; background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: clamp(16px,4vw,28px); backdrop-filter: blur(12px);
     margin-bottom: clamp(16px,3vw,24px);
-    display: none;
   }
-  .prizes-section.visible { display: block; animation: fadeUp 0.4s ease; }
+  .prizes-section.visible { display: block; animation: fadeUp 0.45s ease; }
   .section-title {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(12px,2.5vw,15px);
-    color: var(--cyan);
-    letter-spacing: 2px;
-    margin-bottom: 20px;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(12px,2.5vw,15px);
+    color: var(--cyan); letter-spacing: 2px; margin-bottom: clamp(16px,3vw,24px);
     display: flex; align-items: center; gap: 8px;
   }
-  .prizes-layout {
-    display: flex; gap: clamp(12px,3vw,24px); align-items: flex-end;
-  }
 
-  /* Thermometer */
-  .thermo-wrap {
-    display: flex; flex-direction: column; align-items: center;
-    flex-shrink: 0; width: 36px;
-    position: relative;
-  }
-  .thermo-track {
-    width: 14px;
-    height: clamp(240px,50vw,360px);
-    background: rgba(255,255,255,0.07);
-    border-radius: 8px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.1);
-  }
-  .thermo-fill {
-    position: absolute; bottom: 0; left: 0; right: 0;
-    background: linear-gradient(to top, #00ff9d, #00f5ff, #7b2fff);
-    border-radius: 8px;
-    transition: height 0.8s cubic-bezier(0.34,1.56,0.64,1);
-    height: 0%;
-  }
-  .thermo-bulb {
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #00ff9d, #00f5ff);
-    box-shadow: 0 0 16px rgba(0,255,157,0.6);
-    margin-top: 4px;
-  }
+  .prizes-layout { display: flex; gap: clamp(14px,3vw,28px); align-items: stretch; }
 
-  /* Prize list */
-  .prize-list { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-  .prize-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.07);
+  /* ── Thermometer column ── */
+  .thermo-col { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 40px; }
+
+  .thermo-tube {
+    position: relative; width: 16px; flex: 1;
     border-radius: 10px;
-    padding: clamp(8px,2vw,12px) clamp(10px,2.5vw,16px);
-    display: flex; align-items: center; gap: 10px;
-    position: relative;
-    transition: border-color 0.3s, box-shadow 0.3s;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.10);
+    overflow: visible;
+    min-height: 200px;
   }
+
+  /* liquid fill */
+  .thermo-fill {
+    position: absolute; bottom: 0; left: 0; right: 0; border-radius: 10px;
+    background: linear-gradient(to top, #00ff9d 0%, #00f5ff 45%, #7b2fff 100%);
+    box-shadow: 0 0 10px rgba(0,255,157,0.55), 0 0 24px rgba(0,245,255,0.3);
+    height: 0%;
+    transition: height 1.1s cubic-bezier(0.34,1.4,0.64,1);
+  }
+  /* shimmer on liquid */
+  .thermo-fill::after {
+    content: '';
+    position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.28) 50%, transparent 75%);
+    animation: shimmer 2.8s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%{transform:translateX(-150%)} 100%{transform:translateX(250%)} }
+
+  /* threshold node */
+  .thermo-node {
+    position: absolute; left: 50%;
+    transform: translate(-50%, 50%);
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.22);
+    transition: background 0.5s, border-color 0.5s, box-shadow 0.5s;
+    z-index: 3;
+  }
+  .thermo-node.lit {
+    background: var(--green);
+    border-color: var(--green);
+    box-shadow: 0 0 10px var(--green), 0 0 24px rgba(0,255,157,0.55);
+    animation: node-ping 2s ease-in-out infinite;
+  }
+  @keyframes node-ping {
+    0%,100% { box-shadow: 0 0 8px var(--green), 0 0 18px rgba(0,255,157,0.4); }
+    50%      { box-shadow: 0 0 16px var(--green), 0 0 36px rgba(0,255,157,0.7); }
+  }
+
+  /* connector line from node to prize card */
+  .thermo-connector {
+    position: absolute; left: calc(100% + 1px);
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,255,157,0.5), transparent);
+    width: clamp(14px,3vw,28px);
+    transform-origin: left center;
+    top: 50%; transform: translateY(-50%);
+    pointer-events: none;
+    transition: opacity 0.4s;
+    opacity: 0.4;
+  }
+  .thermo-node.lit .thermo-connector { opacity: 0.9; }
+
+  /* bulb */
+  .thermo-bulb {
+    width: 24px; height: 24px; border-radius: 50%; margin-top: 5px; flex-shrink: 0;
+    background: radial-gradient(circle at 35% 35%, #00ff9d, #009eb0);
+    box-shadow: 0 0 14px rgba(0,255,157,0.7), 0 0 30px rgba(0,245,255,0.4);
+  }
+
+  /* ── Prize list ── */
+  .prize-list { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+
+  .prize-item {
+    position: relative; display: flex; align-items: center; gap: 10px;
+    padding: clamp(10px,2vw,14px) clamp(12px,2.5vw,18px);
+    border-radius: 12px; border: 1px solid rgba(255,255,255,0.07);
+    background: rgba(255,255,255,0.025); overflow: hidden;
+    transition: border-color 0.45s, background 0.45s, box-shadow 0.45s, filter 0.45s;
+  }
+  .prize-item.locked { filter: saturate(0.15) brightness(0.65); }
   .prize-item.unlocked {
-    border-color: rgba(0,255,157,0.5);
-    box-shadow: 0 0 16px rgba(0,255,157,0.12);
-    background: rgba(0,255,157,0.05);
+    border-color: rgba(0,255,157,0.55);
+    background: rgba(0,255,157,0.055);
+    box-shadow: 0 0 22px rgba(0,255,157,0.1), inset 0 0 18px rgba(0,255,157,0.04);
+    filter: none;
   }
-  .prize-icon {
-    font-size: clamp(18px,3.5vw,24px); flex-shrink: 0;
-    filter: grayscale(1) opacity(0.4);
-    transition: filter 0.3s;
+  /* pop animation */
+  .prize-item.just-unlocked { animation: prize-pop 0.6s cubic-bezier(0.34,1.7,0.64,1); }
+  @keyframes prize-pop { 0%{transform:scale(1)} 45%{transform:scale(1.055)} 100%{transform:scale(1)} }
+  /* sheen sweep */
+  .prize-item::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(105deg, transparent 30%, rgba(0,255,157,0.2) 50%, transparent 70%);
+    transform: translateX(-120%);
   }
-  .prize-item.unlocked .prize-icon { filter: none; }
+  .prize-item.just-unlocked::before { animation: sheen 0.6s ease forwards; }
+  @keyframes sheen { 0%{transform:translateX(-120%)} 100%{transform:translateX(130%)} }
+
+  .prize-icon { font-size: clamp(20px,4vw,26px); flex-shrink: 0; line-height: 1; transition: transform 0.35s; }
+  .prize-item.unlocked .prize-icon { transform: scale(1.18); }
+
   .prize-body { flex: 1; min-width: 0; }
   .prize-name {
-    font-size: clamp(11px,2.2vw,14px);
-    font-weight: 700;
-    color: rgba(224,232,255,0.6);
-    transition: color 0.3s;
+    font-size: clamp(12px,2.2vw,15px); font-weight: 700;
+    color: rgba(224,232,255,0.5); transition: color 0.45s;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
   .prize-item.unlocked .prize-name { color: #fff; }
   .prize-pts {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(9px,1.8vw,11px);
-    color: rgba(224,232,255,0.3);
-    margin-top: 2px;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(9px,1.8vw,11px);
+    color: rgba(224,232,255,0.25); margin-top: 3px; transition: color 0.45s;
   }
   .prize-item.unlocked .prize-pts { color: var(--cyan); }
-  .prize-minibar {
-    width: clamp(40px,8vw,70px); flex-shrink: 0;
+
+  /* mini bar */
+  .prize-bar { width: clamp(48px,9vw,88px); flex-shrink: 0; }
+  @media (max-width:520px) { .prize-bar { display: none; } }
+  .bar-track { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; }
+  .bar-fill {
+    height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green));
+    border-radius: 2px; width: 0%; transition: width 1.1s ease;
   }
-  @media (max-width:600px) { .prize-minibar { display:none; } }
-  .minibar-track {
-    height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden;
-  }
-  .minibar-fill {
-    height: 100%;
-    background: linear-gradient(90deg, var(--cyan), var(--green));
-    border-radius: 2px;
-    transition: width 0.8s ease;
-    width: 0%;
-  }
+  .bar-pct { font-family: 'Orbitron', sans-serif; font-size: 9px; color: rgba(224,232,255,0.28); text-align: right; margin-top: 3px; transition: color 0.45s; }
+  .prize-item.unlocked .bar-pct { color: var(--green); }
+
+  /* UNLOCKED badge */
   .unlock-badge {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(8px,1.5vw,10px);
-    background: var(--green);
-    color: #000;
-    padding: 2px 7px;
-    border-radius: 4px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    opacity: 0;
-    transform: scale(0.8);
-    transition: opacity 0.3s, transform 0.3s;
-    flex-shrink: 0;
+    font-family: 'Orbitron', sans-serif; font-size: clamp(8px,1.4vw,10px); font-weight: 700;
+    letter-spacing: 0.5px; padding: 3px 8px; border-radius: 5px;
+    background: var(--green); color: #000; flex-shrink: 0;
+    opacity: 0; transform: scale(0.65) translateY(5px);
+    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.6,0.64,1);
   }
-  .prize-item.unlocked .unlock-badge { opacity: 1; transform: scale(1); }
-  .lock-overlay {
-    position: absolute; inset: 0;
-    background: rgba(6,6,20,0.45);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    transition: opacity 0.3s;
-    pointer-events: none;
+  .prize-item.unlocked .unlock-badge { opacity: 1; transform: scale(1) translateY(0); }
+
+  /* lock icon */
+  .lock-icon {
+    position: absolute; right: 12px; font-size: 14px; opacity: 0.3;
+    transition: opacity 0.45s; pointer-events: none;
   }
-  .prize-item.unlocked .lock-overlay { opacity: 0; }
+  .prize-item.unlocked .lock-icon { opacity: 0; }
 
   /* ── Leaderboard ── */
   .lb-section {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: clamp(16px,4vw,28px);
-    backdrop-filter: blur(12px);
-    margin-bottom: clamp(16px,3vw,24px);
+    background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+    padding: clamp(16px,4vw,28px); backdrop-filter: blur(12px); margin-bottom: clamp(16px,3vw,24px);
   }
   .lb-table { width: 100%; border-collapse: collapse; }
   .lb-table th {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(9px,1.8vw,11px);
-    color: rgba(224,232,255,0.35);
-    letter-spacing: 1.5px;
-    text-align: left;
-    padding: 0 8px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Orbitron', sans-serif; font-size: clamp(9px,1.8vw,11px);
+    color: rgba(224,232,255,0.35); letter-spacing: 1.5px; text-align: left;
+    padding: 0 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.06);
   }
   .lb-table th:last-child { text-align: right; }
-  .lb-row td {
-    padding: clamp(7px,1.5vw,10px) 8px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    font-size: clamp(12px,2.2vw,14px);
-    transition: background 0.2s;
-  }
+  .lb-row td { padding: clamp(7px,1.5vw,10px) 8px; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: clamp(12px,2.2vw,14px); }
   .lb-row:last-child td { border-bottom: none; }
-  .lb-row.me td {
-    background: rgba(0,245,255,0.06);
-  }
-  .lb-row.me td:first-child {
-    border-left: 2px solid var(--cyan);
-  }
-  .rank-cell {
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(12px,2.2vw,14px);
-    font-weight: 700;
-    width: 44px;
-  }
+  .lb-row.me td { background: rgba(0,245,255,0.06); }
+  .lb-row.me td:first-child { border-left: 2px solid var(--cyan); }
+  .rank-cell { font-family: 'Orbitron', sans-serif; font-size: clamp(12px,2.2vw,14px); font-weight: 700; width: 44px; }
   .rank-1 { color: #ffd700; text-shadow: 0 0 10px rgba(255,215,0,0.7); }
   .rank-2 { color: #c0c0c0; }
   .rank-3 { color: #cd7f32; }
   .player-cell { display: flex; align-items: center; gap: 8px; }
   .p-emoji { font-size: clamp(16px,3vw,20px); }
-  .p-phone { 
-    font-family: 'Orbitron', sans-serif;
-    font-size: clamp(11px,2vw,13px);
-    letter-spacing: 1px;
-    color: rgba(224,232,255,0.75);
-  }
-  .me-tag {
-    font-size: clamp(9px,1.5vw,10px);
-    background: var(--cyan);
-    color: #000;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: 700;
-    font-family: 'Orbitron', sans-serif;
-  }
-  .score-cell {
-    text-align: right;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 700;
-    font-size: clamp(13px,2.5vw,16px);
-    color: var(--gold);
-    text-shadow: 0 0 8px rgba(255,215,0,0.4);
-  }
+  .p-phone { font-family: 'Orbitron', sans-serif; font-size: clamp(11px,2vw,13px); letter-spacing: 1px; color: rgba(224,232,255,0.75); }
+  .me-tag { font-size: clamp(9px,1.5vw,10px); background: var(--cyan); color: #000; padding: 1px 6px; border-radius: 4px; font-weight: 700; font-family: 'Orbitron', sans-serif; }
+  .score-cell { text-align: right; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: clamp(13px,2.5vw,16px); color: var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.4); }
 
   /* ── Toast ── */
   #toast {
     position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px);
     background: linear-gradient(135deg, rgba(0,255,157,0.15), rgba(0,245,255,0.15));
-    border: 1px solid var(--green);
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-family: 'Orbitron', sans-serif;
-    font-size: 13px;
-    color: var(--green);
-    letter-spacing: 1px;
-    z-index: 999;
+    border: 1px solid var(--green); border-radius: 12px;
+    padding: 12px 24px; font-family: 'Orbitron', sans-serif; font-size: 13px;
+    color: var(--green); letter-spacing: 1px; z-index: 999;
     transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), opacity 0.4s;
-    opacity: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    backdrop-filter: blur(12px);
+    opacity: 0; pointer-events: none; white-space: nowrap; backdrop-filter: blur(12px);
   }
   #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
   /* ── Stars ── */
-  .star {
-    position: fixed;
-    pointer-events: none;
-    z-index: 998;
-    font-size: 20px;
-    animation: starBurst 1s ease-out forwards;
-  }
-  @keyframes starBurst {
-    0% { transform: translate(0,0) scale(0); opacity: 1; }
-    100% { transform: translate(var(--dx), var(--dy)) scale(1.5); opacity: 0; }
-  }
-
-  /* ── Error state ── */
-  .error-msg {
-    display: none;
-    color: var(--pink);
-    font-size: clamp(12px,2vw,13px);
-    margin-top: 10px;
-    font-family: 'Orbitron', sans-serif;
-    letter-spacing: 1px;
-    animation: shake 0.3s ease;
-  }
-  @keyframes shake {
-    0%,100% { transform: translateX(0); }
-    25% { transform: translateX(-6px); }
-    75% { transform: translateX(6px); }
-  }
+  .star { position: fixed; pointer-events: none; z-index: 998; font-size: 20px; animation: starBurst 1s ease-out forwards; }
+  @keyframes starBurst { 0%{transform:translate(0,0) scale(0);opacity:1} 100%{transform:translate(var(--dx),var(--dy)) scale(1.5);opacity:0} }
 </style>
 </head>
 <body>
@@ -548,16 +407,21 @@
     </div>
   </div>
 
-  <!-- Prizes -->
+  <!-- Prizes + Thermometer -->
   <div class="prizes-section" id="prizes-section">
     <div class="section-title">🏆 獎品解鎖進度</div>
     <div class="prizes-layout">
-      <div class="thermo-wrap">
-        <div class="thermo-track">
+
+      <!-- Thermometer column -->
+      <div class="thermo-col" id="thermo-col">
+        <div class="thermo-tube" id="thermo-tube">
           <div class="thermo-fill" id="thermo-fill"></div>
+          <!-- nodes injected by JS -->
         </div>
         <div class="thermo-bulb"></div>
       </div>
+
+      <!-- Prize cards: rendered HIGH → LOW by JS -->
       <div class="prize-list" id="prize-list"></div>
     </div>
   </div>
@@ -567,11 +431,7 @@
     <div class="section-title">⚡ 即時排行榜</div>
     <table class="lb-table">
       <thead>
-        <tr>
-          <th>排名</th>
-          <th>玩家</th>
-          <th style="text-align:right">積分</th>
-        </tr>
+        <tr><th>排名</th><th>玩家</th><th style="text-align:right">積分</th></tr>
       </thead>
       <tbody id="lb-body"></tbody>
     </table>
@@ -579,171 +439,229 @@
 
 </div>
 
-<div id="toast">🎉 獎品解鎖！</div>
+<div id="toast"></div>
 
 <script>
-// ── Real Data ──
-const ALL_DATA = ALL_DATA_PLACEHOLDER;
+/* ── Injected data ── */
+const ALL_DATA    = ALL_DATA_PLACEHOLDER;
 const LEADERBOARD = LEADERBOARD_PLACEHOLDER;
 
+/* ── Prize config ── */
 const PRIZES = [
-  { icon:'☕', name:'咖啡兌換券',   pts: 200 },
-  { icon:'🏷️', name:'九折優惠碼',   pts: 400 },
-  { icon:'🎬', name:'電影票',       pts: 600 },
-  { icon:'🎰', name:'抽獎機會',     pts: 800 },
-  { icon:'🎧', name:'藍牙耳機',     pts:1000 },
-  { icon:'📱', name:'iPad',         pts:1400 },
+  { icon:'☕',  name:'咖啡兌換券', pts:  200 },
+  { icon:'🏷️', name:'九折優惠碼', pts:  400 },
+  { icon:'🎬',  name:'電影票',    pts:  600 },
+  { icon:'🎰',  name:'抽獎機會',  pts:  800 },
+  { icon:'🎧',  name:'藍牙耳機',  pts: 1000 },
+  { icon:'📱',  name:'iPad',      pts: 1400 },
 ];
-
-const EMOJIS = ['🦁','🐯','🦊','🐼','🦄','🐉','🦋','🌟','🔥','⚡','🎯','🏆','💎','🚀','🌈','🦅','🎸','🌙','⭐','🎪'];
+const MAX_PTS = PRIZES[PRIZES.length - 1].pts;
+const EMOJIS  = ['🦁','🐯','🦊','🐼','🦄','🐉','🦋','🌟','🔥','⚡','🎯','🏆','💎','🚀','🌈','🦅','🎸','🌙','⭐','🎪'];
 const END_DATE = new Date('2025-12-31T23:59:59');
 
 let currentPhone = null;
 
-// ── Countdown ──
-function updateCountdown() {
-  const diff = END_DATE - new Date();
-  if (diff <= 0) { ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent='00'); return; }
-  const d = Math.floor(diff/86400000);
-  const h = Math.floor((diff%86400000)/3600000);
-  const m = Math.floor((diff%3600000)/60000);
-  const s = Math.floor((diff%60000)/1000);
+/* ════════ Countdown ════════ */
+function tick() {
+  const diff = END_DATE - Date.now();
+  if (diff <= 0) { ['cd-d','cd-h','cd-m','cd-s'].forEach(id => (document.getElementById(id).textContent = '00')); return; }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor(diff % 86400000 / 3600000);
+  const m = Math.floor(diff % 3600000 / 60000);
+  const s = Math.floor(diff % 60000 / 1000);
   document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
   document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
   document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
   document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
 }
-setInterval(updateCountdown, 1000);
-updateCountdown();
+setInterval(tick, 1000); tick();
 
-// ── Leaderboard ──
-function renderLeaderboard(highlightPhone) {
+/* ════════ Leaderboard ════════ */
+function renderLeaderboard(hl) {
   const medals = ['👑','🥈','🥉'];
-  const tbody = document.getElementById('lb-body');
+  const tbody  = document.getElementById('lb-body');
   tbody.innerHTML = '';
   LEADERBOARD.forEach((p, i) => {
-    const isMe = highlightPhone && p.phone === highlightPhone;
-    const rankDisplay = i < 3 ? medals[i] : p.rank;
-    const rankClass = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'';
-    const maskedPhone = p.phone.slice(0,4) + '****' + p.phone.slice(-3);
+    const isMe = hl && p.phone === hl;
+    const rc   = ['rank-1','rank-2','rank-3'][i] || '';
+    const mask = p.phone.slice(0,4) + '****' + p.phone.slice(-3);
     tbody.innerHTML += `
       <tr class="lb-row ${isMe?'me':''}">
-        <td class="rank-cell ${rankClass}">${rankDisplay}</td>
-        <td>
-          <div class="player-cell">
-            <span class="p-emoji">${p.emoji}</span>
-            <span class="p-phone">${isMe ? p.phone : maskedPhone}</span>
-            ${isMe ? '<span class="me-tag">我</span>' : ''}
-          </div>
-        </td>
+        <td class="rank-cell ${rc}">${i<3?medals[i]:p.rank}</td>
+        <td><div class="player-cell">
+          <span class="p-emoji">${p.emoji}</span>
+          <span class="p-phone">${isMe?p.phone:mask}</span>
+          ${isMe?'<span class="me-tag">我</span>':''}
+        </div></td>
         <td class="score-cell">${p.score.toLocaleString()}</td>
       </tr>`;
   });
 }
 renderLeaderboard(null);
 
-// ── Search ──
+/* ════════ Search ════════ */
 function doSearch() {
-  const raw = document.getElementById('phone-input').value.trim();
-  const phone = raw.startsWith('0') ? raw : '0'+raw;
-  const err = document.getElementById('error-msg');
+  const raw   = document.getElementById('phone-input').value.trim();
+  const phone = raw.startsWith('0') ? raw : '0' + raw;
+  const err   = document.getElementById('error-msg');
 
   if (!ALL_DATA[phone]) {
     err.style.display = 'block';
+    err.style.animation = 'none';
+    void err.offsetWidth;
+    err.style.animation = 'shake 0.3s ease';
     document.getElementById('account-card').style.display = 'none';
     document.getElementById('prizes-section').classList.remove('visible');
-    void err.offsetWidth; // re-trigger animation
-    err.style.animation = 'none';
-    requestAnimationFrame(() => { err.style.animation = ''; });
     return;
   }
+
   err.style.display = 'none';
   currentPhone = phone;
-
   const { rank, score } = ALL_DATA[phone];
-  const emojiIdx = (parseInt(phone.slice(-2)) || 0) % EMOJIS.length;
+  const ei = (parseInt(phone.slice(-2)) || 0) % EMOJIS.length;
 
-  document.getElementById('user-emoji').textContent = EMOJIS[emojiIdx];
+  document.getElementById('user-emoji').textContent = EMOJIS[ei];
   document.getElementById('user-phone').textContent = phone;
-  document.getElementById('user-rank').textContent = '#' + rank.toLocaleString();
+  document.getElementById('user-rank').textContent  = '#' + rank.toLocaleString();
   document.getElementById('user-score').textContent = score.toLocaleString();
 
   document.getElementById('account-card').style.display = 'block';
   document.getElementById('prizes-section').classList.add('visible');
 
-  renderPrizes(score);
   renderLeaderboard(phone);
-
-  // Scroll to account card
+  // small delay: let prizes-section animate in before measuring heights
+  setTimeout(() => renderPrizes(score), 90);
   document.getElementById('account-card').scrollIntoView({ behavior:'smooth', block:'center' });
 }
+document.getElementById('phone-input').addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
 
-document.getElementById('phone-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter') doSearch();
-});
-
-// ── Prizes ──
+/* ════════════════════════════════════════
+   🌡️  renderPrizes
+   Builds prize cards (high→low) then
+   positions thermometer nodes to align
+   with the vertical centre of each card.
+   ════════════════════════════════════════ */
 function renderPrizes(score) {
-  const maxPts = PRIZES[PRIZES.length-1].pts;
-  const pct = Math.min(100, (score / maxPts) * 100);
-  document.getElementById('thermo-fill').style.height = pct + '%';
-
   const list = document.getElementById('prize-list');
   list.innerHTML = '';
-  const unlockedItems = [];
 
-  [...PRIZES].reverse().forEach(p => {
+  const rev = [...PRIZES].reverse();   // [iPad, 藍牙耳機, …, 咖啡]
+
+  rev.forEach(p => {
     const unlocked = score >= p.pts;
-    const miniPct = Math.min(100, Math.round((score / p.pts) * 100));
-    if (unlocked) unlockedItems.push(p);
-    list.innerHTML += `
-      <div class="prize-item ${unlocked?'unlocked':''}">
-        <div class="prize-icon">${p.icon}</div>
-        <div class="prize-body">
-          <div class="prize-name">${p.name}</div>
-          <div class="prize-pts">${p.pts.toLocaleString()} pts</div>
-        </div>
-        <div class="prize-minibar">
-          <div class="minibar-track">
-            <div class="minibar-fill" style="width:${miniPct}%"></div>
-          </div>
-        </div>
-        <div class="unlock-badge">UNLOCKED</div>
-        ${!unlocked ? '<div class="lock-overlay">🔒</div>' : ''}
-      </div>`;
+    const pct      = Math.min(100, Math.round((score / p.pts) * 100));
+    const div      = document.createElement('div');
+    div.className   = 'prize-item ' + (unlocked ? 'unlocked' : 'locked');
+    div.dataset.pts = p.pts;
+    div.innerHTML = `
+      <div class="prize-icon">${p.icon}</div>
+      <div class="prize-body">
+        <div class="prize-name">${p.name}</div>
+        <div class="prize-pts">${p.pts.toLocaleString()} pts</div>
+      </div>
+      <div class="prize-bar">
+        <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
+        <div class="bar-pct">${pct}%</div>
+      </div>
+      <div class="unlock-badge">UNLOCKED</div>
+      ${!unlocked ? '<div class="lock-icon">🔒</div>' : ''}
+    `;
+    list.appendChild(div);
   });
 
-  if (unlockedItems.length > 0) {
+  // wait a frame for DOM paint, then place nodes
+  requestAnimationFrame(() => placeNodes(score, rev));
+}
+
+function placeNodes(score, rev) {
+  const tube  = document.getElementById('thermo-tube');
+  const fill  = document.getElementById('thermo-fill');
+  const list  = document.getElementById('prize-list');
+  const items = list.querySelectorAll('.prize-item');
+
+  // clear old nodes
+  tube.querySelectorAll('.thermo-node').forEach(n => n.remove());
+
+  const tubeR = tube.getBoundingClientRect();
+  const tubeH = tubeR.height;
+  if (!tubeH) return;
+
+  rev.forEach((p, i) => {
+    const itemR    = items[i].getBoundingClientRect();
+    const centY    = itemR.top + itemR.height / 2;
+    // fraction from top of tube → convert to fraction from bottom
+    const fracFromTop    = (centY - tubeR.top) / tubeH;
+    const fracFromBottom = 1 - fracFromTop;
+    const clampedPct     = Math.max(2, Math.min(98, fracFromBottom * 100));
+
+    const node = document.createElement('div');
+    node.className = 'thermo-node' + (score >= p.pts ? ' lit' : '');
+    node.style.bottom = clampedPct + '%';
+
+    // connector line pointing right toward prize card
+    const line = document.createElement('div');
+    line.className = 'thermo-connector';
+    node.appendChild(line);
+
+    tube.appendChild(node);
+  });
+
+  /* fill level: map score linearly against MAX_PTS,
+     but anchor top/bottom to match first/last node position */
+  const topNode    = tube.querySelector('.thermo-node:last-child');   // highest threshold (iPad) = last appended
+  const bottomNode = tube.querySelector('.thermo-node:first-child');  // lowest threshold (coffee) = first appended
+  // Simple linear fill
+  const fillPct = Math.min(100, (score / MAX_PTS) * 100);
+  fill.style.height = fillPct + '%';
+
+  /* unlock animations */
+  const unlocked = Array.from(items).filter(el => el.classList.contains('unlocked'));
+  if (unlocked.length > 0) {
+    unlocked.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add('just-unlocked');
+        setTimeout(() => el.classList.remove('just-unlocked'), 650);
+      }, i * 130);
+    });
     setTimeout(() => {
-      showToast(`🎉 已解鎖 ${unlockedItems.length} 項獎品！`);
-      burst(window.innerWidth/2, window.innerHeight/2);
-    }, 600);
+      showToast(`🎉 已解鎖 ${unlocked.length} 項獎品！`);
+      burst(window.innerWidth / 2, window.innerHeight * 0.42);
+    }, 750);
   }
 }
 
-// ── Toast ──
+/* re-align nodes on resize */
+let _rt;
+window.addEventListener('resize', () => {
+  clearTimeout(_rt);
+  _rt = setTimeout(() => {
+    if (currentPhone && ALL_DATA[currentPhone]) {
+      placeNodes(ALL_DATA[currentPhone].score, [...PRIZES].reverse());
+    }
+  }, 150);
+});
+
+/* ════════ Toast ════════ */
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+  setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// ── Star burst ──
+/* ════════ Star burst ════════ */
 function burst(x, y) {
-  const symbols = ['⭐','✨','💥','🌟','💫','⚡'];
-  for (let i = 0; i < 12; i++) {
+  const s = ['⭐','✨','💥','🌟','💫','⚡'];
+  for (let i = 0; i < 14; i++) {
     const el = document.createElement('div');
     el.className = 'star';
-    el.textContent = symbols[Math.floor(Math.random()*symbols.length)];
-    const angle = (i/12)*360;
-    const dist = 80 + Math.random()*80;
-    el.style.setProperty('--dx', Math.cos(angle*Math.PI/180)*dist+'px');
-    el.style.setProperty('--dy', Math.sin(angle*Math.PI/180)*dist+'px');
-    el.style.left = x+'px';
-    el.style.top = y+'px';
+    el.textContent = s[Math.floor(Math.random() * s.length)];
+    const a = (i / 14) * 360, d = 70 + Math.random() * 110;
+    el.style.setProperty('--dx', Math.cos(a * Math.PI/180) * d + 'px');
+    el.style.setProperty('--dy', Math.sin(a * Math.PI/180) * d + 'px');
+    el.style.left = x + 'px'; el.style.top = y + 'px';
     document.body.appendChild(el);
-    setTimeout(() => el.remove(), 1000);
+    setTimeout(() => el.remove(), 1050);
   }
 }
 </script>
