@@ -49,19 +49,18 @@ def load_data():
 
 @st.cache_data
 def compute_total(dfs):
-    phones = set()
-    for df in dfs.values():
-        phones.update(df["Phone"].tolist())
+    # 用 pandas merge 取代逐筆迴圈，速度快數十倍
+    merged = None
+    for i, (name, df) in enumerate(dfs.items()):
+        renamed = df.rename(columns={"Score": f"Score_{name}"})
+        if merged is None:
+            merged = renamed
+        else:
+            merged = merged.merge(renamed, on="Phone", how="outer")
 
-    records = []
-    for phone in phones:
-        total = 0
-        for df in dfs.values():
-            row = df[df["Phone"] == phone]
-            if not row.empty:
-                total += int(row["Score"].iloc[0])
-        records.append({"Phone": phone, "Total": total})
-    return pd.DataFrame(records)
+    score_cols = [c for c in merged.columns if c.startswith("Score_")]
+    merged["Total"] = merged[score_cols].fillna(0).sum(axis=1).astype(int)
+    return merged[["Phone", "Total"]]
 
 
 def get_prize_counts(total_df):
@@ -363,11 +362,17 @@ def main():
 </div>
 """, unsafe_allow_html=True)
 
-    # 載入資料
+    # 載入資料（cache_data 確保只計算一次）
     try:
         dfs = load_data()
         total_df = compute_total(dfs)
         prize_counts = get_prize_counts(total_df)
+        # 預建 phone→score 字典，查詢時 O(1)
+        score_index = {
+            name: df.set_index("Phone")["Score"].to_dict()
+            for name, df in dfs.items()
+        }
+        total_index = total_df.set_index("Phone")["Total"].to_dict()
     except Exception as e:
         st.error(f"❌ 資料載入失敗：{e}")
         return
@@ -382,9 +387,8 @@ def main():
 
     if search and phone:
         phone = phone.strip()
-        row = total_df[total_df["Phone"] == phone]
 
-        if row.empty:
+        if phone not in total_index:
             st.markdown(f"""
 <div class="not-found">
     ⚠️ 找不到手機號碼 <b>{phone}</b> 的資料<br>
@@ -392,7 +396,7 @@ def main():
 </div>
 """, unsafe_allow_html=True)
         else:
-            user_score = int(row["Total"].iloc[0])
+            user_score = int(total_index[phone])
 
             # 總分卡片
             st.markdown(f"""
@@ -403,19 +407,18 @@ def main():
 </div>
 """, unsafe_allow_html=True)
 
-            # 分項積分
+            # 分項積分（O(1) 字典查詢）
             detail_items = [
-                ("⚡ 充電度數", dfs["Degree"], "TotalScore", "Degree"),
-                ("🚗 車輛綁定", dfs["Car"], "CarTotalScore", "Car"),
-                ("📍 拜訪站點", dfs["Station"], "StationScore", "Station"),
-                ("🔢 充電次數", dfs["Count"], "CountScore", "Count"),
-                ("💰 儲值金額", dfs["Save"], "SaveScore", "Save"),
+                ("⚡ 充電度數", "Degree"),
+                ("🚗 車輛綁定", "Car"),
+                ("📍 拜訪站點", "Station"),
+                ("🔢 充電次數", "Count"),
+                ("💰 儲值金額", "Save"),
             ]
 
             detail_html = '<div class="detail-grid">'
-            for label, df, _, name in detail_items:
-                r = df[df["Phone"] == phone]
-                val = int(r["Score"].iloc[0]) if not r.empty else 0
+            for label, name in detail_items:
+                val = int(score_index[name].get(phone, 0))
                 detail_html += f"""
 <div class="detail-card">
     <div class="detail-val">{val:,}</div>
