@@ -452,21 +452,22 @@
 
 <script>
 /* ── Injected data ── */
-const ALL_DATA    = ALL_DATA_PLACEHOLDER;
-const LEADERBOARD = LEADERBOARD_PLACEHOLDER;
+const ALL_DATA      = ALL_DATA_PLACEHOLDER;
+const LEADERBOARD   = LEADERBOARD_PLACEHOLDER;
+const WINNER_COUNTS = WINNER_COUNTS_PLACEHOLDER;   // {10000:0, 5000:0, ..., 300:374}
 
-/* ── Prize config (with real winner counts) ── */
+/* ── Prize config — winners pulled from WINNER_COUNTS ── */
 const PRIZES = [
-  { icon:'🌟', name:'EVALUE 萬元點數',          pts:10000, winners:   0 },
-  { icon:'⚡', name:'2026 3天免費充電方案',       pts: 5000, winners:   0 },
-  { icon:'💎', name:'EVALUE 500點',              pts: 2500, winners:   0 },
-  { icon:'🔋', name:'2026 1天免費充電方案',       pts: 2000, winners:   0 },
-  { icon:'🎯', name:'DC 快充 50% 回饋券 x3',     pts: 1500, winners:   1 },
-  { icon:'🎁', name:'EVALUE 500點',              pts: 1000, winners:  10 },
-  { icon:'⚡', name:'DC 快充 50% 回饋券 x1',     pts:  750, winners:  21 },
-  { icon:'🎫', name:'DC 快充 25% 回饋券 x3',     pts:  500, winners:  91 },
-  { icon:'☕', name:'EVALUE 50點',               pts:  300, winners: 374 },
-];
+  { icon:'🌟', name:'EVALUE 萬元點數',       pts:10000 },
+  { icon:'⚡', name:'2026 3天免費充電方案',   pts: 5000 },
+  { icon:'💎', name:'EVALUE 500點',          pts: 2500 },
+  { icon:'🔋', name:'2026 1天免費充電方案',   pts: 2000 },
+  { icon:'🎯', name:'DC 快充 50% 回饋券 x3', pts: 1500 },
+  { icon:'🎁', name:'EVALUE 500點',          pts: 1000 },
+  { icon:'⚡', name:'DC 快充 50% 回饋券 x1', pts:  750 },
+  { icon:'🎫', name:'DC 快充 25% 回饋券 x3', pts:  500 },
+  { icon:'☕', name:'EVALUE 50點',           pts:  300 },
+].map(p => ({ ...p, winners: WINNER_COUNTS[p.pts] ?? 0 }));
 const MAX_PTS = PRIZES[0].pts;   // highest threshold = 10000
 const EMOJIS  = ['🦁','🐯','🦊','🐼','🦄','🐉','🦋','🌟','🔥','⚡','🎯','🏆','💎','🚀','🌈','🦅','🎸','🌙','⭐','🎪'];
 

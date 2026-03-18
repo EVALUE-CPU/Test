@@ -4,7 +4,7 @@ import pandas as pd
 import json
 
 st.set_page_config(
-    page_title="Charging Points Event",
+    page_title="EVALUE 5歲生日快樂活動",
     page_icon="zap",
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -20,9 +20,18 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 
+# ── 獎品門檻（高→低），只設分數，winners 由程式從 CSV 計算 ──
+PRIZE_THRESHOLDS = [10000, 5000, 2500, 2000, 1500, 1000, 750, 500, 300]
+
+
 @st.cache_data
 def load_data():
-    """讀取五個 CSV，合併計算每人總積分，回傳 all_data dict 與 leaderboard list"""
+    """
+    讀取五個 CSV，以 Phone 為 key outer join，
+    將所有含 'score' 的欄位加總為 TotalScore，
+    並計算每個獎品門檻的達標人數。
+    回傳 all_data dict 與 winner_counts dict。
+    """
     base = os.path.dirname(__file__)
 
     degree  = pd.read_csv(os.path.join(base, "Degree.csv"))
@@ -31,7 +40,6 @@ def load_data():
     save    = pd.read_csv(os.path.join(base, "Save.csv"))
     station = pd.read_csv(os.path.join(base, "Station.csv"))
 
-    # 找出各檔包含 "score" (不分大小寫) 的欄位
     def score_col(df):
         return next(c for c in df.columns if "score" in c.lower())
 
@@ -50,43 +58,35 @@ def load_data():
     df["rank"]  = df.index + 1
     df["Phone"] = df["Phone"].astype(str).str.zfill(10)
 
-    # all_data：phone -> {rank, score}，供查詢用
+    # 計算每個門檻達標人數（TotalScore >= threshold）
+    winner_counts = {
+        pts: int((df["TotalScore"] >= pts).sum())
+        for pts in PRIZE_THRESHOLDS
+    }
+
+    # all_data：phone -> {rank, score}，供前端查詢
     all_data = {
         row["Phone"]: {"rank": int(row["rank"]), "score": int(row["TotalScore"])}
         for _, row in df.iterrows()
     }
 
-    # leaderboard：前 50 名，附 emoji
-    EMOJIS = ["🦁","🐯","🦊","🐼","🦄","🐉","🦋","🌟","🔥","⚡",
-              "🎯","🏆","💎","🚀","🌈","🦅","🎸","🌙","⭐","🎪"]
-    leaderboard = [
-        {
-            "rank":  int(row["rank"]),
-            "phone": row["Phone"],
-            "score": int(row["TotalScore"]),
-            "emoji": EMOJIS[i % len(EMOJIS)],
-        }
-        for i, (_, row) in enumerate(df.head(50).iterrows())
-    ]
-
-    return all_data, leaderboard
+    return all_data, winner_counts
 
 
-# ── 讀取並注入資料 ──────────────────────────────────────────────
-all_data, leaderboard = load_data()
+# ── 執行 ────────────────────────────────────────────
+all_data, winner_counts = load_data()
 
 html_path = os.path.join(os.path.dirname(__file__), "index.html")
 with open(html_path, "r", encoding="utf-8") as f:
     html_content = f.read()
 
-# 將真實資料注入 HTML 的佔位符
 html_content = html_content.replace(
     "ALL_DATA_PLACEHOLDER",
     json.dumps(all_data, ensure_ascii=False)
 )
 html_content = html_content.replace(
-    "LEADERBOARD_PLACEHOLDER",
-    json.dumps(leaderboard, ensure_ascii=False)
+    "WINNER_COUNTS_PLACEHOLDER",
+    json.dumps(winner_counts, ensure_ascii=False)   # e.g. {"300":374,"500":91,...}
 )
 
 st.components.v1.html(html_content, height=1800, scrolling=True)
