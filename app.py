@@ -79,156 +79,236 @@ def inject_css():
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
 
 /* ══════════════════════════════════════
-   CSS VARIABLES — Flat Design × Game
+   GAME UI — Dark Flat Design
+   Primary: #003366  Accent: #f28500
 ══════════════════════════════════════ */
 :root {
-    --primary:      #003366;
-    --primary-mid:  #004080;
-    --primary-lt:   #e8f0f8;
-    --accent:       #f28500;
-    --accent-lt:    #fff3e0;
-    --bg:           #f0f4f8;
-    --surface:      #ffffff;
-    --surface2:     #f7fafc;
-    --border:       #dbe4ee;
-    --text:         #1a2a3a;
-    --text-mid:     #4a6080;
-    --text-lt:      #8a9bb0;
-    --success:      #00a86b;
-    --warn:         #e05c00;
-    --radius:       12px;
-    --radius-lg:    16px;
+    --primary:    #003366;
+    --primary2:   #004a99;
+    --accent:     #f28500;
+    --accent2:    #ffb347;
+    --teal:       #00c9a7;
+    --pink:       #e94f8b;
+    --bg:         #0f1923;
+    --bg2:        #162030;
+    --bg3:        #1e2d40;
+    --surface:    #1e2d40;
+    --surface2:   #253547;
+    --border:     #2a3f58;
+    --text:       #e8f0f8;
+    --text-mid:   #8aaac8;
+    --text-lt:    #506880;
+    --success:    #00c9a7;
+    --radius:     10px;
+    --radius-lg:  14px;
 }
 
-/* ══ 全域 ══ */
+/* ══ GLOBAL ══ */
 html, body, [class*="css"] {
     font-family: 'Nunito', sans-serif;
     background: var(--bg) !important;
     color: var(--text);
 }
-.stApp { background: var(--bg) !important; }
+.stApp {
+    background: var(--bg) !important;
+    /* Game grid background */
+    background-image:
+        linear-gradient(rgba(0,51,102,.18) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,51,102,.18) 1px, transparent 1px) !important;
+    background-size: 40px 40px !important;
+}
+
+/* Floating pixel decorations */
+.stApp::before {
+    content: '⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    padding: 6px 0;
+    text-align: center;
+    font-size: .65rem;
+    letter-spacing: .5em;
+    color: rgba(242,133,0,.25);
+    background: rgba(15,25,35,.9);
+    border-bottom: 1px solid rgba(242,133,0,.15);
+    z-index: 999;
+    pointer-events: none;
+}
+.stApp::after {
+    content: '⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡';
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    padding: 6px 0;
+    text-align: center;
+    font-size: .65rem;
+    letter-spacing: .5em;
+    color: rgba(242,133,0,.25);
+    background: rgba(15,25,35,.9);
+    border-top: 1px solid rgba(242,133,0,.15);
+    z-index: 999;
+    pointer-events: none;
+}
+
 .block-container {
-    padding-top: .5rem !important;
+    padding-top: 2rem !important;
+    padding-bottom: 2.5rem !important;
     max-width: 700px;
+    position: relative;
 }
 #MainMenu, footer, header { visibility: hidden; }
 hr { border-color: var(--border) !important; margin: 1rem 0 !important; }
 
-/* ══ HERO ══ */
+/* ══ HERO — Game Header Panel ══ */
 .hero {
     background: var(--primary);
+    border: 2px solid var(--accent);
     border-radius: var(--radius-lg);
-    padding: 2.2rem 1.5rem 1.8rem;
+    padding: 2rem 1.5rem 1.6rem;
     text-align: center;
     margin-bottom: 1.2rem;
+    position: relative;
+    overflow: hidden;
+    /* pixelated corner notch effect */
+    clip-path: polygon(0 10px,10px 0,calc(100% - 10px) 0,100% 10px,100% calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,0 calc(100% - 10px));
+}
+/* animated scan line */
+.hero::before {
+    content:'';
+    position:absolute;
+    top:-100%; left:0; right:0;
+    height:40%;
+    background: linear-gradient(to bottom, transparent, rgba(242,133,0,.06), transparent);
+    animation: scan 3s linear infinite;
+}
+/* corner stars */
+.hero::after {
+    content:'★ ★ ★ ★ ★';
+    position:absolute;
+    bottom:8px; left:0; right:0;
+    text-align:center;
+    font-size:.6rem;
+    letter-spacing:.8em;
+    color:rgba(242,133,0,.4);
+}
+@keyframes scan {
+    0%   { top: -100%; }
+    100% { top:  200%; }
 }
 .hero-badge {
     display: inline-block;
     background: var(--accent);
     color: #fff;
-    font-size: .72rem;
-    font-weight: 700;
-    letter-spacing: .1em;
-    padding: .2rem .9rem;
-    border-radius: 20px;
+    font-size: .7rem;
+    font-weight: 800;
+    letter-spacing: .15em;
+    padding: .25rem 1rem;
+    border-radius: 3px;
     margin-bottom: .9rem;
+    text-transform: uppercase;
+    /* pixel underline */
+    border-bottom: 3px solid rgba(0,0,0,.3);
 }
 .hero-title {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 900;
     color: #ffffff;
     line-height: 1.2;
     margin-bottom: .4rem;
+    text-shadow: 0 2px 0 rgba(0,0,0,.4);
 }
 .hero-title span { color: var(--accent); }
 .hero-sub {
-    font-size: .85rem;
-    color: rgba(255,255,255,.65);
+    font-size: .82rem;
+    color: rgba(255,255,255,.55);
     letter-spacing: .05em;
 }
 
-/* ══ INPUT ══ */
+/* ══ INPUT — Game Console Style ══ */
 .stTextInput > div > div > input {
-    background: var(--surface) !important;
+    background: var(--bg2) !important;
     border: 2px solid var(--border) !important;
     border-radius: var(--radius) !important;
-    color: var(--text) !important;
+    color: var(--accent2) !important;
     font-family: 'Space Mono', monospace !important;
     font-size: 1rem !important;
     padding: .65rem 1rem !important;
     text-align: center;
-    letter-spacing: .12em;
-    box-shadow: none !important;
+    letter-spacing: .2em;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.3) !important;
 }
+.stTextInput > div > div > input::placeholder { color: var(--text-lt) !important; }
 .stTextInput > div > div > input:focus {
-    border-color: var(--primary) !important;
-    box-shadow: 0 0 0 3px rgba(0,51,102,.12) !important;
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 3px rgba(242,133,0,.2), inset 0 2px 6px rgba(0,0,0,.3) !important;
 }
 
-/* ══ BUTTON ══ */
+/* ══ BUTTON — Pixel Game Button ══ */
 .stButton > button {
     background: var(--accent) !important;
     color: #fff !important;
-    font-weight: 800 !important;
+    font-weight: 900 !important;
     font-family: 'Nunito', sans-serif !important;
     font-size: 1rem !important;
+    letter-spacing: .08em !important;
+    text-transform: uppercase;
     border: none !important;
     border-radius: var(--radius) !important;
-    padding: .65rem 2rem !important;
+    padding: .7rem 2rem !important;
     width: 100%;
-    letter-spacing: .04em;
-    transition: background .15s, transform .1s;
+    border-bottom: 4px solid #b36200 !important;
+    transition: transform .1s, border-bottom .1s;
 }
 .stButton > button:hover {
-    background: #d97700 !important;
-    transform: translateY(-1px);
+    background: #ffb347 !important;
+    transform: translateY(-2px);
 }
-.stButton > button:active { transform: translateY(0); }
+.stButton > button:active {
+    transform: translateY(2px) !important;
+    border-bottom: 1px solid #b36200 !important;
+}
 
-/* ══ SCORE CARD ══ */
+/* ══ SCORE CARD — XP Panel ══ */
 .score-card {
     background: var(--primary);
+    border: 2px solid var(--accent);
     border-radius: var(--radius-lg);
-    padding: 1.6rem 1.5rem;
+    padding: 1.5rem;
     text-align: center;
     margin: .8rem 0;
     position: relative;
     overflow: hidden;
+    clip-path: polygon(0 8px,8px 0,calc(100% - 8px) 0,100% 8px,100% calc(100% - 8px),calc(100% - 8px) 100%,8px 100%,0 calc(100% - 8px));
 }
 .score-card::before {
-    content: '';
-    position: absolute;
-    top: -30px; right: -30px;
-    width: 120px; height: 120px;
-    background: rgba(242,133,0,.15);
-    border-radius: 50%;
-}
-.score-card::after {
-    content: '';
-    position: absolute;
-    bottom: -40px; left: -20px;
-    width: 100px; height: 100px;
-    background: rgba(255,255,255,.04);
-    border-radius: 50%;
+    content:'XP';
+    position:absolute;
+    top:10px; left:14px;
+    font-size:.6rem;
+    font-weight:700;
+    letter-spacing:.15em;
+    color:rgba(242,133,0,.4);
+    font-family:'Space Mono',monospace;
 }
 .score-phone {
-    font-size: .8rem;
-    color: rgba(255,255,255,.55);
-    letter-spacing: .1em;
-    margin-bottom: .3rem;
+    font-size: .75rem;
+    color: rgba(255,255,255,.45);
+    letter-spacing: .12em;
+    margin-bottom: .2rem;
+    font-family: 'Space Mono', monospace;
 }
 .score-number {
     font-family: 'Space Mono', monospace;
-    font-size: 3.4rem;
+    font-size: 3.6rem;
     font-weight: 700;
     color: var(--accent);
     line-height: 1;
+    text-shadow: 0 0 20px rgba(242,133,0,.4);
 }
 .score-unit {
-    font-size: .82rem;
-    color: rgba(255,255,255,.6);
-    margin-top: .25rem;
-    letter-spacing: .08em;
+    font-size: .75rem;
+    color: rgba(255,255,255,.5);
+    margin-top: .3rem;
+    letter-spacing: .12em;
+    text-transform: uppercase;
 }
 
 /* ══ NOT FOUND ══ */
@@ -238,23 +318,35 @@ hr { border-color: var(--border) !important; margin: 1rem 0 !important; }
     border-radius: var(--radius-lg);
     padding: 2rem;
     text-align: center;
-    color: var(--text-lt);
+    color: var(--text-mid);
     font-size: .9rem;
     margin: 1rem 0;
 }
 
-/* ══ SECTION LABEL ══ */
+/* ══ SECTION LABEL — Quest Label ══ */
 .section-label {
-    font-size: .72rem;
-    font-weight: 700;
-    color: var(--text-lt);
-    letter-spacing: .12em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: .68rem;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: .18em;
     text-transform: uppercase;
-    margin: 1.2rem 0 .5rem;
+    margin: 1.4rem 0 .6rem;
+}
+.section-label::before,
+.section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border));
+}
+.section-label::before {
+    background: linear-gradient(90deg, var(--border), transparent);
 }
 </style>
 """, unsafe_allow_html=True)
-
 # ─────────────────────────────────────────────
 # 溫度計 HTML（全用 inline style，避免 Streamlit 壓縮 HTML 導致 class 失效）
 # ─────────────────────────────────────────────
@@ -266,24 +358,24 @@ def render_thermometer(user_score, prize_counts):
     # Flat Design palette
     ROW_BASE = (
         "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:8px 12px;"
-        "margin-bottom:5px;border:1px solid #dbe4ee;"
-        "background:#ffffff;"
+        "border-radius:8px;padding:7px 10px;"
+        "margin-bottom:4px;border:1px solid #2a3f58;"
+        "background:#1e2d40;"
     )
     ROW_UNLOCKED = (
         "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:8px 12px;"
-        "margin-bottom:5px;border:1px solid #f28500;"
-        "background:#fff8f0;"
+        "border-radius:8px;padding:7px 10px;"
+        "margin-bottom:4px;border:1px solid #f28500;"
+        "background:#2a1f0d;"
     )
-    DOT_BASE     = "width:10px;height:10px;border-radius:50%;background:#dbe4ee;flex-shrink:0;"
-    DOT_UNLOCKED = "width:10px;height:10px;border-radius:50%;background:#f28500;flex-shrink:0;"
-    SCORE_BASE     = "font-family:monospace;font-size:.72rem;color:#8a9bb0;min-width:48px;"
-    SCORE_UNLOCKED = "font-family:monospace;font-size:.72rem;color:#b36200;min-width:48px;font-weight:700;"
-    NAME_BASE      = "font-size:.82rem;font-weight:600;color:#8a9bb0;flex:1;"
-    NAME_UNLOCKED  = "font-size:.82rem;font-weight:700;color:#003366;flex:1;"
-    COUNT_BASE     = "font-family:monospace;font-size:.68rem;color:#b0bec5;white-space:nowrap;"
-    COUNT_UNLOCKED = "font-family:monospace;font-size:.68rem;color:#f28500;white-space:nowrap;"
+    DOT_BASE     = "width:9px;height:9px;border-radius:50%;background:#2a3f58;flex-shrink:0;"
+    DOT_UNLOCKED = "width:9px;height:9px;border-radius:50%;background:#f28500;box-shadow:0 0 5px #f28500;flex-shrink:0;"
+    SCORE_BASE     = "font-family:monospace;font-size:.7rem;color:#506880;min-width:48px;"
+    SCORE_UNLOCKED = "font-family:monospace;font-size:.7rem;color:#f28500;min-width:48px;font-weight:700;"
+    NAME_BASE      = "font-size:.8rem;font-weight:600;color:#506880;flex:1;"
+    NAME_UNLOCKED  = "font-size:.8rem;font-weight:700;color:#e8f0f8;flex:1;"
+    COUNT_BASE     = "font-family:monospace;font-size:.67rem;color:#2a3f58;white-space:nowrap;"
+    COUNT_UNLOCKED = "font-family:monospace;font-size:.67rem;color:#f28500;white-space:nowrap;"
 
     prize_rows_html = ""
     for p in PRIZES:
@@ -311,17 +403,18 @@ def render_thermometer(user_score, prize_counts):
         )
 
     html = (
-        '<div style="display:flex;gap:16px;align-items:flex-start;margin:8px 0;">' +
+        '<div style="display:flex;gap:14px;align-items:flex-start;margin:8px 0;">' +
         # tube column
-        '<div style="flex:0 0 40px;display:flex;flex-direction:column;align-items:center;">' +
-            f'<div style="width:20px;background:#f0f4f8;border-radius:10px 10px 0 0;' +
-            f'border:2px solid #dbe4ee;position:relative;overflow:hidden;height:{tube_h}px;">' +
+        '<div style="flex:0 0 38px;display:flex;flex-direction:column;align-items:center;">' +
+            f'<div style="width:18px;background:#0f1923;border-radius:9px 9px 0 0;' +
+            f'border:2px solid #2a3f58;position:relative;overflow:hidden;height:{tube_h}px;">' +
                 f'<div style="position:absolute;bottom:0;left:0;right:0;height:{pct:.1f}%;' +
-                f'background:linear-gradient(to top,#f28500,#ffb347);"></div>' +
+                f'background:linear-gradient(to top,#f28500,#ffb347);box-shadow:0 0 8px #f28500;"></div>' +
             '</div>' +
-            '<div style="width:32px;height:32px;' +
+            '<div style="width:30px;height:30px;' +
             'background:#f28500;border-radius:50%;' +
-            'border:3px solid #dbe4ee;margin-top:-2px;flex-shrink:0;"></div>' +
+            'border:3px solid #2a3f58;margin-top:-2px;flex-shrink:0;' +
+            'box-shadow:0 0 10px rgba(242,133,0,.5);"></div>' +
         '</div>' +
         # prize list
         f'<div style="flex:1;">{prize_rows_html}</div>' +
@@ -398,31 +491,37 @@ def main():
             st.markdown('<div class="section-label">📊 分項積分明細</div>', unsafe_allow_html=True)
 
             def make_card(score, title, emoji, rules_html, progress_html, accent="#f28500"):
-                # Flat Design card: white surface, primary title, accent score
-                bar_w = min(int(score / 1500 * 100), 100)  # rough visual bar
+                bar_w = min(int(score / 1500 * 100), 100)
                 return (
-                    '<div style="background:#fff;border:1px solid #dbe4ee;border-radius:12px;' +
-                    'padding:14px 16px;margin-bottom:10px;">' +
-                        # header row
-                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+                    # Game card: dark surface + accent border-left
+                    f'<div style="background:#1e2d40;border:1px solid #2a3f58;' +
+                    f'border-left:3px solid {accent};border-radius:10px;' +
+                    f'padding:13px 15px;margin-bottom:8px;">' +
+                        # header
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
                             f'<div style="display:flex;align-items:center;gap:8px;">' +
-                                f'<div style="background:#e8f0f8;border-radius:8px;width:32px;height:32px;' +
-                                f'display:flex;align-items:center;justify-content:center;font-size:1.1rem;">{emoji}</div>' +
-                                f'<span style="font-weight:800;font-size:.92rem;color:#003366;">{title}</span>' +
+                                f'<div style="background:#253547;border-radius:7px;width:30px;height:30px;' +
+                                f'display:flex;align-items:center;justify-content:center;font-size:1rem;' +
+                                f'border:1px solid #2a3f58;">{emoji}</div>' +
+                                f'<span style="font-weight:800;font-size:.9rem;color:#e8f0f8;">{title}</span>' +
                             '</div>' +
-                            f'<div style="background:#fff3e0;border-radius:8px;padding:3px 10px;">' +
-                                f'<span style="font-family:monospace;font-size:1rem;font-weight:700;color:{accent};">+{score:,}</span>' +
-                                f'<span style="font-size:.7rem;color:#b36200;"> 分</span>' +
+                            # score badge
+                            f'<div style="background:#0f1923;border:1px solid {accent}44;' +
+                            f'border-radius:6px;padding:2px 10px;display:flex;align-items:baseline;gap:3px;">' +
+                                f'<span style="font-family:monospace;font-size:.95rem;font-weight:700;color:{accent};">+{score:,}</span>' +
+                                f'<span style="font-size:.65rem;color:#506880;">分</span>' +
                             '</div>' +
                         '</div>' +
-                        # progress bar
-                        '<div style="background:#f0f4f8;border-radius:4px;height:5px;margin-bottom:10px;">' +
-                            f'<div style="background:{accent};border-radius:4px;height:5px;width:{bar_w}%;transition:width .6s;"></div>' +
+                        # XP bar
+                        '<div style="background:#0f1923;border-radius:3px;height:4px;margin-bottom:9px;">' +
+                            f'<div style="background:linear-gradient(90deg,{accent},{accent}99);' +
+                            f'border-radius:3px;height:4px;width:{bar_w}%;"></div>' +
                         '</div>' +
                         # rules
-                        f'<div style="font-size:.73rem;color:#6a80a0;line-height:1.8;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eef1f5;">{rules_html}</div>' +
-                        # progress detail
-                        f'<div style="font-size:.8rem;color:#2a4a6a;">{progress_html}</div>' +
+                        f'<div style="font-size:.72rem;color:#506880;line-height:1.8;margin-bottom:7px;' +
+                        f'padding-bottom:7px;border-bottom:1px solid #253547;">{rules_html}</div>' +
+                        # progress
+                        f'<div style="font-size:.8rem;color:#8aaac8;">{progress_html}</div>' +
                     '</div>'
                 )
 
@@ -436,7 +535,7 @@ def main():
             cards_html += make_card(
                 deg_score, "充電度數", "🔋",
                 "DC 充電：每 1 度 = 1 分 ／ AC 充電：每 10 度 = 1 分",
-                f"DC <b style='color:#003366;'>{dc:,.2f} 度</b>　／　AC <b style='color:#003366;'>{ac:,.2f} 度</b>"
+                f"DC <b style='color:#f28500;'>{dc:,.2f} 度</b>　／　AC <b style='color:#f28500;'>{ac:,.2f} 度</b>"
             )
 
             # 🚗 車輛綁定
@@ -446,11 +545,11 @@ def main():
                 car_bound = str(car_row["CarCount"].iloc[0]).strip().lower() == "true"
             car_score = int(score_index["Car"].get(phone, 0))
             bound_tag = (
-                '<span style="background:#e6f4ed;color:#00a86b;border:1px solid #00a86b44;' +
-                'border-radius:6px;padding:2px 10px;font-weight:700;">✅ 已完成綁定</span>'
+                '<span style="background:#0d2e1f;color:#00c9a7;border:1px solid #00c9a744;' +
+                'border-radius:5px;padding:2px 10px;font-weight:700;">✅ 已完成綁定</span>'
                 if car_bound else
-                '<span style="background:#fff0e6;color:#e05c00;border:1px solid #e05c0044;' +
-                'border-radius:6px;padding:2px 10px;font-weight:700;">⚠️ 尚未綁定</span>'
+                '<span style="background:#2e1a0d;color:#f28500;border:1px solid #f2850044;' +
+                'border-radius:5px;padding:2px 10px;font-weight:700;">⚠️ 尚未綁定</span>'
             )
             cards_html += make_card(
                 car_score, "車輛綁定", "🚗",
@@ -466,7 +565,7 @@ def main():
             cards_html += make_card(
                 sta_score, "拜訪站點", "📍",
                 "一般站點：每站 10 分 ／ 精選站點：每站 30 分（基本 10 + 額外 20）",
-                f"精選站點 <b style='color:#f28500;'>{special_cnt} 站</b>　／　一般站點 <b style='color:#003366;'>{normal_cnt} 站</b>　共 <b style='color:#1a2a3a;font-size:.9rem;'>{special_cnt+normal_cnt} 站</b>",
+                f"精選站點 <b style='color:#f28500;'>{special_cnt} 站</b>　／　一般站點 <b style='color:#00c9a7;'>{normal_cnt} 站</b>　共 <b style='color:#e8f0f8;font-size:.9rem;'>{special_cnt+normal_cnt} 站</b>",
                 accent="#ffd700"
             )
 
@@ -479,7 +578,7 @@ def main():
             cards_html += make_card(
                 cnt_score, "充電次數", "🔢",
                 "每累積 20 次充電 = 50 分",
-                f"目前充電 <b style='color:#003366;'>{charge_cnt} 次</b>　距下一里程碑還差 <b style='color:#f28500;'>{cnt_left} 次</b>（第 {next_milestone} 次）"
+                f"目前充電 <b style='color:#00c9a7;'>{charge_cnt} 次</b>　距下一里程碑還差 <b style='color:#f28500;'>{cnt_left} 次</b>（第 {next_milestone} 次）"
             )
 
             # 💰 儲值金額
@@ -489,7 +588,7 @@ def main():
             cards_html += make_card(
                 sav_score, "儲值金額", "💰",
                 "每儲值 1,000 元 = 10 分",
-                f"累積儲值 <b style='color:#003366;'>NT$ {total_amt:,}</b>"
+                f"累積儲值 <b style='color:#f28500;'>NT$ {total_amt:,}</b>"
             )
 
             # 🌟 特殊活動
