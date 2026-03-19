@@ -118,7 +118,7 @@ html, body, [class*="css"] {
     background-size: 40px 40px !important;
 }
 
-/* Floating pixel decorations */
+/* ══ TOP / BOTTOM TICKER BARS ══ */
 .stApp::before {
     content: '⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡  ★  🎯  ⚡  ★  🎮  ⚡';
     position: fixed;
@@ -146,6 +146,144 @@ html, body, [class*="css"] {
     border-top: 1px solid rgba(242,133,0,.15);
     z-index: 999;
     pointer-events: none;
+}
+
+/* ══ LEFT / RIGHT BRICK COLUMNS ══
+   Uses repeating SVG bricks + wood door panels
+   Pure CSS, fixed position, pointer-events:none
+══════════════════════════════════════════════ */
+
+/* shared column base */
+.game-col-left, .game-col-right {
+    position: fixed;
+    top: 0; bottom: 0;
+    width: 72px;
+    z-index: 100;
+    pointer-events: none;
+    overflow: hidden;
+}
+.game-col-left  { left: 0; }
+.game-col-right { right: 0; }
+
+/* Brick repeating pattern via inline SVG data URI */
+.game-col-left::before,
+.game-col-right::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='40'%3E%3Crect width='72' height='40' fill='%23162030'/%3E%3Crect x='1' y='1' width='34' height='18' rx='1' fill='%231a2d42' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='37' y='1' width='34' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='1' y='21' width='22' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='25' y='21' width='24' height='18' rx='1' fill='%231a2d42' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='51' y='21' width='20' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3C/svg%3E");
+    background-size: 72px 40px;
+    background-repeat: repeat-y;
+    opacity: 1;
+}
+
+/* Accent stripe (glowing edge toward content) */
+.game-col-left::after,
+.game-col-right::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(242,133,0,.5) 15%,
+        rgba(242,133,0,.8) 30%,
+        rgba(242,133,0,.5) 50%,
+        rgba(242,133,0,.8) 70%,
+        rgba(242,133,0,.5) 85%,
+        transparent 100%
+    );
+    animation: glowpulse 2.5s ease-in-out infinite alternate;
+}
+.game-col-left::after  { right: 0; }
+.game-col-right::after { left: 0; }
+
+@keyframes glowpulse {
+    from { opacity: .5; }
+    to   { opacity: 1; }
+}
+
+/* ══ WOOD DOOR PANELS — mid-column decorations ══ */
+.game-door-left, .game-door-right {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 60px;
+    z-index: 101;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+}
+.game-door-left  { left: 6px; }
+.game-door-right { right: 6px; }
+
+.door-cap {
+    width: 52px; height: 12px;
+    background: linear-gradient(180deg, #c97a1a, #7a4a0a);
+    border-radius: 4px 4px 0 0;
+    border: 1.5px solid #5a3508;
+    border-bottom: none;
+}
+.door-body {
+    width: 52px;
+    background: linear-gradient(180deg, #a0600e 0%, #7a4808 40%, #5c3806 100%);
+    border: 1.5px solid #3a2504;
+    border-top: none;
+    border-bottom: none;
+    padding: 8px 6px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: center;
+}
+.door-plank {
+    width: 38px; height: 10px;
+    background: linear-gradient(180deg, #c8820e, #8a5208);
+    border-radius: 2px;
+    border: 1px solid #4a2e04;
+    box-shadow: inset 0 1px 0 rgba(255,200,80,.2);
+}
+.door-knob {
+    width: 10px; height: 10px;
+    background: radial-gradient(circle at 35% 35%, #ffd700, #b8860b);
+    border-radius: 50%;
+    border: 1px solid #8b6914;
+    margin: 2px auto;
+}
+.door-base {
+    width: 52px; height: 10px;
+    background: linear-gradient(180deg, #7a4808, #3a2202);
+    border-radius: 0 0 4px 4px;
+    border: 1.5px solid #3a2504;
+    border-top: none;
+}
+/* small stars above/below door */
+.door-star {
+    font-size: 1rem;
+    color: #f28500;
+    opacity: .7;
+    margin: 4px 0;
+    animation: starpulse 2s ease-in-out infinite alternate;
+}
+@keyframes starpulse {
+    from { opacity: .4; transform: scale(1); }
+    to   { opacity: .9; transform: scale(1.15); }
+}
+/* icon badges on brick column */
+.col-badge {
+    position: fixed;
+    width: 36px; height: 36px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    z-index: 102;
+    pointer-events: none;
+    background: #1e2d40;
+    border: 2px solid #f28500;
+    box-shadow: 0 0 8px rgba(242,133,0,.35);
 }
 
 .block-container {
@@ -432,6 +570,40 @@ def main():
         layout="centered",
     )
     inject_css()
+
+    # ── 左右磚牆 + 木門裝飾 ──
+    st.markdown("""
+<div class="game-col-left"></div>
+<div class="game-col-right"></div>
+
+<div class="game-door-left">
+  <div class="door-star">★</div>
+  <div class="door-cap"></div>
+  <div class="door-body">
+    <div class="door-plank"></div>
+    <div class="door-plank"></div>
+    <div class="door-knob"></div>
+    <div class="door-plank"></div>
+    <div class="door-plank"></div>
+  </div>
+  <div class="door-base"></div>
+  <div class="door-star">⚡</div>
+</div>
+
+<div class="game-door-right">
+  <div class="door-star">★</div>
+  <div class="door-cap"></div>
+  <div class="door-body">
+    <div class="door-plank"></div>
+    <div class="door-plank"></div>
+    <div class="door-knob"></div>
+    <div class="door-plank"></div>
+    <div class="door-plank"></div>
+  </div>
+  <div class="door-base"></div>
+  <div class="door-star">⚡</div>
+</div>
+""", unsafe_allow_html=True)
 
     # 英雄區
     st.markdown("""
