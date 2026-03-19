@@ -40,12 +40,8 @@ def load_data():
         if os.path.exists(path):
             df = pd.read_csv(path, dtype={phone_col: str})
             df[phone_col] = df[phone_col].str.strip()
-            keep = [phone_col, score_col]
-            if "Mark" in df.columns:
-                keep.append("Mark")
-            dfs[name] = df[keep].rename(
-                columns={phone_col: "Phone", score_col: "Score"}
-            )
+            # 保留全部欄位，只重命名 phone 和 score 欄
+            dfs[name] = df.rename(columns={phone_col: "Phone", score_col: "Score"})
         else:
             dfs[name] = pd.DataFrame(columns=["Phone", "Score"])
     return dfs
@@ -443,44 +439,101 @@ def main():
 </div>
 """, unsafe_allow_html=True)
 
-            # 分項積分（O(1) 字典查詢）
-            detail_items = [
-                ("⚡ 充電度數", "Degree"),
-                ("🚗 車輛綁定", "Car"),
-                ("📍 拜訪站點", "Station"),
-                ("🔢 充電次數", "Count"),
-                ("💰 儲值金額", "Save"),
-                ("🌟 特殊活動", "Special"),
-            ]
+            # ── 分項積分詳細卡片 ──
+            st.markdown('<div style="margin:16px 0 6px;font-size:.8rem;color:#4a7fa8;letter-spacing:.1em;">📊 分項積分明細</div>', unsafe_allow_html=True)
 
-            detail_html = '<div class="detail-grid">'
-            for label, name in detail_items:
-                val = int(score_index[name].get(phone, 0))
-                detail_html += f"""
-<div class="detail-card">
-    <div class="detail-val">{val:,}</div>
-    <div class="detail-lbl">{label}</div>
-</div>"""
-            detail_html += "</div>"
-            st.markdown(detail_html, unsafe_allow_html=True)
+            def make_card(score, title, emoji, rules_html, progress_html, accent="#00d4ff"):
+                return (
+                    f'<div style="background:#111827;border:1px solid #1e3a5f;border-radius:14px;' +
+                    f'padding:14px 16px;margin-bottom:10px;">' +
+                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
+                    f'<span style="font-size:.95rem;font-weight:700;color:#e8f4fd;">{emoji} {title}</span>' +
+                    f'<span style="font-family:monospace;font-size:1.15rem;font-weight:700;color:{accent};">+{score:,} 分</span>' +
+                    f'</div>' +
+                    f'<div style="font-size:.75rem;color:#4a7fa8;line-height:1.7;margin-bottom:6px;">{rules_html}</div>' +
+                    f'<div style="background:#0a0e1a;border-radius:8px;padding:7px 10px;font-size:.78rem;color:#7ec8e3;">{progress_html}</div>' +
+                    f'</div>'
+                )
 
-            # 特殊活動標記
-            special_df = dfs.get("Special", pd.DataFrame())
-            if not special_df.empty and phone in score_index.get("Special", {}):
-                sp_row = special_df[special_df["Phone"] == phone]
-                if not sp_row.empty and "Mark" in sp_row.columns:
-                    mark = sp_row["Mark"].iloc[0]
-                    sp_score = int(score_index["Special"].get(phone, 0))
-                    st.markdown(
-                        f'<div style="background:linear-gradient(90deg,rgba(255,215,0,.1),rgba(255,107,53,.1));' +
-                        f'border:1px solid rgba(255,215,0,.4);border-radius:12px;padding:10px 16px;' +
-                        f'margin:8px 0;display:flex;align-items:center;gap:10px;">' +
-                        f'<span style="font-size:1.3rem;">🌟</span>' +
-                        f'<div><div style="font-weight:700;color:#ffd700;font-size:.9rem;">{mark}</div>' +
-                        f'<div style="font-size:.75rem;color:#a07830;">特殊活動 +{sp_score} 分</div></div>' +
-                        f'</div>',
-                        unsafe_allow_html=True
-                    )
+            cards_html = ""
+
+            # 🔋 充電度數
+            deg_row = dfs["Degree"][dfs["Degree"]["Phone"] == phone]
+            dc = float(deg_row["TotalDC"].iloc[0]) if not deg_row.empty and "TotalDC" in deg_row.columns else 0.0
+            ac = float(deg_row["TotalAC"].iloc[0]) if not deg_row.empty and "TotalAC" in deg_row.columns else 0.0
+            deg_score = int(score_index["Degree"].get(phone, 0))
+            cards_html += make_card(
+                deg_score, "充電度數", "🔋",
+                "DC 充電：每 1 度 = 1 分 ／ AC 充電：每 10 度 = 1 分",
+                f"DC <b style='color:#00d4ff;'>{dc:,.2f} 度</b> ／ AC <b style='color:#00d4ff;'>{ac:,.2f} 度</b>"
+            )
+
+            # 🚗 車輛綁定
+            car_row = dfs["Car"][dfs["Car"]["Phone"] == phone]
+            car_bound = False
+            if not car_row.empty and "CarCount" in car_row.columns:
+                car_bound = str(car_row["CarCount"].iloc[0]).strip().lower() == "true"
+            car_score = int(score_index["Car"].get(phone, 0))
+            bound_tag = (
+                '<span style="background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff55;' +
+                'border-radius:6px;padding:1px 8px;font-weight:700;">✅ 已完成綁定</span>'
+                if car_bound else
+                '<span style="background:#ff6b3522;color:#ff6b35;border:1px solid #ff6b3555;' +
+                'border-radius:6px;padding:1px 8px;">⚠️ 尚未綁定</span>'
+            )
+            cards_html += make_card(
+                car_score, "車輛綁定", "🚗",
+                "完成「隨插即充」功能綁定，立即獲得 100 分",
+                f"綁定狀態：{bound_tag}"
+            )
+
+            # 📍 拜訪站點
+            sta_row = dfs["Station"][dfs["Station"]["Phone"] == phone]
+            special_cnt = int(sta_row["SpecialStationCount"].iloc[0]) if not sta_row.empty and "SpecialStationCount" in sta_row.columns else 0
+            normal_cnt  = int(sta_row["NormalStationCount"].iloc[0])  if not sta_row.empty and "NormalStationCount" in sta_row.columns else 0
+            sta_score = int(score_index["Station"].get(phone, 0))
+            cards_html += make_card(
+                sta_score, "拜訪站點", "📍",
+                "一般站點：每站 10 分 ／ 精選站點：每站 30 分（基本 10 + 額外 20）",
+                f"精選站點 <b style='color:#ffd700;'>{special_cnt} 站</b> ／ 一般站點 <b style='color:#00d4ff;'>{normal_cnt} 站</b>　共 <b style='color:#e8f4fd;'>{special_cnt+normal_cnt} 站</b>",
+                accent="#ffd700"
+            )
+
+            # 🔢 充電次數
+            cnt_row = dfs["Count"][dfs["Count"]["Phone"] == phone]
+            charge_cnt = int(cnt_row["PhoneCount"].iloc[0]) if not cnt_row.empty and "PhoneCount" in cnt_row.columns else 0
+            cnt_score = int(score_index["Count"].get(phone, 0))
+            next_milestone = ((charge_cnt // 20) + 1) * 20
+            cnt_left = next_milestone - charge_cnt
+            cards_html += make_card(
+                cnt_score, "充電次數", "🔢",
+                "每累積 20 次充電 = 50 分",
+                f"目前充電 <b style='color:#00d4ff;'>{charge_cnt} 次</b>　距下一里程碑還差 <b style='color:#ff6b35;'>{cnt_left} 次</b>（第 {next_milestone} 次）"
+            )
+
+            # 💰 儲值金額
+            sav_row = dfs["Save"][dfs["Save"]["Phone"] == phone]
+            total_amt = int(sav_row["TotalAmount"].iloc[0]) if not sav_row.empty and "TotalAmount" in sav_row.columns else 0
+            sav_score = int(score_index["Save"].get(phone, 0))
+            cards_html += make_card(
+                sav_score, "儲值金額", "💰",
+                "每儲值 1,000 元 = 10 分",
+                f"累積儲值 <b style='color:#00d4ff;'>NT$ {total_amt:,}</b>"
+            )
+
+            # 🌟 特殊活動
+            sp_score = int(score_index.get("Special", {}).get(phone, 0))
+            if sp_score > 0:
+                sp_row = dfs["Special"][dfs["Special"]["Phone"] == phone]
+                mark = sp_row["Mark"].iloc[0] if not sp_row.empty and "Mark" in sp_row.columns else "特殊活動"
+                cards_html += make_card(
+                    sp_score, "特殊活動", "🌟",
+                    "參與特殊活動獲得額外積分",
+                    f"活動名稱：<b style='color:#ffd700;'>{mark}</b>",
+                    accent="#ffd700"
+                )
+
+            st.markdown(cards_html, unsafe_allow_html=True)
 
             # 溫度計 + 獎品
             st.markdown("#### 🌡️ 積分進度 & 獎品解鎖")
