@@ -2,470 +2,434 @@ import streamlit as st
 import pandas as pd
 import os
 
-# ─────────────────────────────────────────────
-# 設定
-# ─────────────────────────────────────────────
-DATA_DIR = "DATA"
+st.set_page_config(
+    page_title="EVALUE 5歲生日快樂活動",
+    page_icon="🎂",
+    layout="centered",
+    initial_sidebar_state="collapsed"
+)
 
-PRIZES = [
-    {"score": 10000, "name": "EVALUE 萬元點數",            "emoji": "🏆"},
-    {"score": 5000,  "name": "2026 3天免費充電方案",        "emoji": "⚡"},
-    {"score": 2500,  "name": "EVALUE 500點",               "emoji": "🎁"},
-    {"score": 2000,  "name": "2026 1天免費充電方案",        "emoji": "🔌"},
-    {"score": 1500,  "name": "DC 快充 50% 回饋卷 x3",      "emoji": "🎫"},
-    {"score": 1000,  "name": "EVALUE 500點",               "emoji": "🎁"},
-    {"score": 750,   "name": "DC 快充 50% 回饋卷 x1",      "emoji": "🎫"},
-    {"score": 500,   "name": "DC 快充 25% 回饋卷 x3",      "emoji": "🎟️"},
-    {"score": 300,   "name": "EVALUE 50點",                "emoji": "⭐"},
+# ── 獎項門檻設定 ──────────────────────────────────────────
+REWARDS = [
+    {"score": 10000, "label": "EVALUE 萬元點數",          "icon": "👑"},
+    {"score": 5000,  "label": "2026 3天免費充電方案",      "icon": "⚡"},
+    {"score": 2500,  "label": "EVALUE 500點",             "icon": "🎁"},
+    {"score": 2000,  "label": "2026 1天免費充電方案",      "icon": "🔋"},
+    {"score": 1500,  "label": "DC 快充 50% 回饋卷 x 3",   "icon": "⚡"},
+    {"score": 1000,  "label": "EVALUE 500點",             "icon": "🎁"},
+    {"score": 750,   "label": "DC 快充 50% 回饋卷 x 1",   "icon": "⚡"},
+    {"score": 500,   "label": "DC 快充 25% 回饋卷 x 3",   "icon": "🌟"},
+    {"score": 300,   "label": "EVALUE 50點",              "icon": "🎀"},
 ]
 
-MAX_SCORE = PRIZES[0]["score"]  # 10000
+DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
-# ─────────────────────────────────────────────
-# 讀取資料
-# ─────────────────────────────────────────────
 @st.cache_data
-def load_data():
-    files = {
-        "Degree":  ("Phone", "TotalScore"),
-        "Car":     ("Phone", "CarTotalScore"),
-        "Station": ("Phone", "StationScore"),
-        "Count":   ("Phone", "CountScore"),
-        "Save":    ("Phone", "SaveScore"),
-    }
-    dfs = {}
-    for name, (phone_col, score_col) in files.items():
-        path = os.path.join(DATA_DIR, f"{name}.csv")
+def load_all_data():
+    def load(fname):
+        path = os.path.join(DATA_DIR, fname)
         if os.path.exists(path):
-            df = pd.read_csv(path, dtype={phone_col: str})
-            df[phone_col] = df[phone_col].str.strip()
-            dfs[name] = df[[phone_col, score_col]].rename(
-                columns={phone_col: "Phone", score_col: "Score"}
-            )
-        else:
-            dfs[name] = pd.DataFrame(columns=["Phone", "Score"])
-    return dfs
+            return pd.read_csv(path, dtype={"Phone": str})
+        return pd.DataFrame()
 
+    degree  = load("Degree.csv")
+    car     = load("Car.csv")
+    station = load("Station.csv")
+    count   = load("Count.csv")
+    save    = load("Save.csv")
+    special = load("Special.csv")
+    return degree, car, station, count, save, special
 
-@st.cache_data
-def compute_total(dfs):
-    # 用 pandas merge 取代逐筆迴圈，速度快數十倍
-    merged = None
-    for i, (name, df) in enumerate(dfs.items()):
-        renamed = df.rename(columns={"Score": f"Score_{name}"})
-        if merged is None:
-            merged = renamed
-        else:
-            merged = merged.merge(renamed, on="Phone", how="outer")
+def compute_total_score(phone: str, degree, car, station, count, save, special) -> int:
+    total = 0
+    for df, col in [
+        (degree,  "TotalScore"),
+        (car,     "CarTotalScore"),
+        (station, "StationScore"),
+        (count,   "CountScore"),
+        (save,    "SaveScore"),
+        (special, "SpecialScore"),
+    ]:
+        if df.empty or "Phone" not in df.columns:
+            continue
+        row = df[df["Phone"] == phone]
+        if not row.empty:
+            total += int(row[col].values[0])
+    return total
 
-    score_cols = [c for c in merged.columns if c.startswith("Score_")]
-    merged["Total"] = merged[score_cols].fillna(0).sum(axis=1).astype(int)
-    return merged[["Phone", "Total"]]
+def get_special_marks(phone: str, special) -> list[str]:
+    """取得該手機的特殊活動標記清單"""
+    if special.empty or "Phone" not in special.columns:
+        return []
+    rows = special[special["Phone"] == phone]
+    if rows.empty:
+        return []
+    return rows["Mark"].tolist()
 
+def count_winners(degree, car, station, count, save, special) -> dict[int, int]:
+    """回傳每個門檻有多少人達標"""
+    all_phones = set()
+    for df in [degree, car, station, count, save, special]:
+        if not df.empty and "Phone" in df.columns:
+            all_phones.update(df["Phone"].tolist())
 
-def get_prize_counts(total_df):
-    counts = {}
-    for p in PRIZES:
-        counts[p["score"]] = int((total_df["Total"] >= p["score"]).sum())
-    return counts
+    scores = {}
+    for ph in all_phones:
+        scores[ph] = compute_total_score(ph, degree, car, station, count, save, special)
 
+    winners = {}
+    for r in REWARDS:
+        winners[r["score"]] = sum(1 for s in scores.values() if s >= r["score"])
+    return winners
 
-# ─────────────────────────────────────────────
-# 樣式
-# ─────────────────────────────────────────────
-def inject_css():
-    st.markdown("""
+# ── CSS ──────────────────────────────────────────────────
+st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Noto+Sans+TC:wght@400;700&display=swap');
 
-/* ── 全域 ── */
-html, body, [class*="css"] {
-    font-family: 'Nunito', sans-serif;
-    background: #0a0e1a;
-    color: #e8f4fd;
+:root {
+    --evalue-green:  #00ff88;
+    --evalue-teal:   #00e5cc;
+    --evalue-dark:   #0a0f1e;
+    --evalue-card:   #111827;
+    --evalue-border: #1e293b;
+    --evalue-glow:   0 0 20px rgba(0,255,136,0.4);
 }
-.stApp { background: #0a0e1a; }
 
-/* ── 標題區 ── */
-.hero {
-    text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
+html, body, [data-testid="stAppViewContainer"] {
+    background: var(--evalue-dark) !important;
+    color: #e2e8f0 !important;
 }
-.hero-title {
-    font-size: 2.6rem;
+
+[data-testid="stHeader"] { background: transparent !important; }
+
+.main-title {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(1.6rem, 5vw, 2.8rem);
     font-weight: 900;
-    background: linear-gradient(135deg, #00d4ff 0%, #7b2ff7 50%, #ff6b35 100%);
+    text-align: center;
+    background: linear-gradient(135deg, var(--evalue-green), var(--evalue-teal), #7c3aed);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    line-height: 1.2;
-    margin-bottom: .3rem;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.2rem;
+    text-shadow: none;
+    filter: drop-shadow(0 0 12px rgba(0,255,136,0.5));
 }
-.hero-sub {
-    font-family: 'Space Mono', monospace;
-    font-size: .85rem;
-    color: #7ec8e3;
-    letter-spacing: .12em;
-}
-.birthday-badge {
-    display: inline-block;
-    background: linear-gradient(135deg,#7b2ff7,#ff6b35);
-    color: white;
-    font-weight: 700;
-    font-size: .75rem;
-    padding: .25rem .75rem;
-    border-radius: 20px;
-    margin-bottom: 1rem;
-    letter-spacing: .08em;
-}
-
-/* ── 查詢輸入 ── */
-.stTextInput > div > div > input {
-    background: #111827 !important;
-    border: 2px solid #1e3a5f !important;
-    border-radius: 12px !important;
-    color: #e8f4fd !important;
-    font-family: 'Space Mono', monospace !important;
-    font-size: 1.1rem !important;
-    padding: .7rem 1rem !important;
+.sub-title {
+    font-family: 'Noto Sans TC', sans-serif;
     text-align: center;
-    letter-spacing: .15em;
+    color: #94a3b8;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    letter-spacing: 0.15em;
 }
-.stTextInput > div > div > input:focus {
-    border-color: #00d4ff !important;
-    box-shadow: 0 0 0 3px rgba(0,212,255,.2) !important;
+.birthday-row {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1.6rem;
+    margin-bottom: 2.5rem;
+    animation: float 3s ease-in-out infinite;
 }
-.stButton > button {
-    background: linear-gradient(135deg,#00d4ff,#7b2ff7) !important;
-    color: white !important;
-    font-weight: 700 !important;
-    font-family: 'Nunito', sans-serif !important;
-    font-size: 1rem !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: .6rem 2rem !important;
-    width: 100%;
-    transition: opacity .2s;
+@keyframes float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
 }
-.stButton > button:hover { opacity: .88 !important; }
 
-/* ── 總分卡片 ── */
+/* score card */
 .score-card {
-    background: linear-gradient(135deg,#111827,#1a2540);
-    border: 1px solid #1e3a5f;
-    border-radius: 20px;
-    padding: 1.8rem;
+    background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    border: 1px solid var(--evalue-green);
+    border-radius: 16px;
+    padding: 2rem;
     text-align: center;
-    margin: 1.2rem 0;
-    box-shadow: 0 4px 30px rgba(0,212,255,.1);
+    box-shadow: var(--evalue-glow), inset 0 0 40px rgba(0,255,136,0.03);
+    margin: 1.5rem 0;
 }
 .score-number {
-    font-family: 'Space Mono', monospace;
-    font-size: 3.2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg,#00d4ff,#7b2ff7);
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 10vw, 5rem);
+    font-weight: 900;
+    background: linear-gradient(90deg, var(--evalue-green), var(--evalue-teal));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1;
+    filter: drop-shadow(0 0 16px rgba(0,255,136,0.7));
 }
-.score-label { font-size: .85rem; color: #7ec8e3; letter-spacing: .1em; }
+.score-label {
+    font-family: 'Noto Sans TC', sans-serif;
+    color: #64748b;
+    font-size: 0.9rem;
+    margin-top: 0.4rem;
+    letter-spacing: 0.2em;
+}
 
-/* ── 溫度計容器 ── */
-.thermo-wrap {
+/* thermometer + rewards */
+.thermo-section {
     display: flex;
     gap: 1.5rem;
+    margin-top: 1.5rem;
     align-items: flex-start;
-    margin: 1rem 0;
 }
-
-/* ── 溫度計管 ── */
-.thermo-tube {
-    flex: 0 0 44px;
+.thermo-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 48px;
+    flex-shrink: 0;
 }
-.thermo-bg {
-    width: 22px;
-    background: #1a2540;
-    border-radius: 11px 11px 0 0;
-    border: 2px solid #1e3a5f;
+.thermo-outer {
     position: relative;
+    width: 24px;
+    border-radius: 12px;
+    background: #1e293b;
+    border: 2px solid #334155;
     overflow: hidden;
 }
 .thermo-fill {
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    border-radius: 0;
-    background: linear-gradient(to top, #ff6b35, #7b2ff7, #00d4ff);
-    transition: height .8s ease;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 12px;
+    background: linear-gradient(to top, #00ff88, #00e5cc, #7c3aed);
+    transition: height 1s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 0 12px rgba(0,255,136,0.6);
 }
 .thermo-bulb {
-    width: 36px; height: 36px;
-    background: radial-gradient(circle at 40% 40%, #ff6b35, #c0392b);
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
-    border: 3px solid #1e3a5f;
+    background: radial-gradient(circle at 35% 35%, #00ff88, #00a86b);
+    border: 2px solid #334155;
+    box-shadow: 0 0 14px rgba(0,255,136,0.8);
     margin-top: -2px;
     flex-shrink: 0;
-    box-shadow: 0 0 12px rgba(255,107,53,.5);
 }
 
-/* ── 獎品列表 ── */
-.prize-list { flex: 1; display: flex; flex-direction: column; gap: .5rem; }
-
-.prize-row {
+/* reward list */
+.rewards-list {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.reward-item {
     display: flex;
     align-items: center;
-    gap: .6rem;
-    background: #111827;
-    border: 1px solid #1e3a5f;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
     border-radius: 10px;
-    padding: .45rem .75rem;
-    transition: all .3s;
+    border: 1px solid #1e293b;
+    background: #111827;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
-.prize-row.unlocked {
-    background: linear-gradient(90deg,rgba(0,212,255,.08),rgba(123,47,247,.08));
-    border-color: #00d4ff;
-    box-shadow: 0 0 10px rgba(0,212,255,.15);
+.reward-item.unlocked {
+    border-color: var(--evalue-green);
+    background: linear-gradient(90deg, rgba(0,255,136,0.08), rgba(0,229,204,0.05));
+    box-shadow: 0 0 10px rgba(0,255,136,0.2);
 }
-.prize-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #1e3a5f;
-    flex-shrink: 0;
+.reward-item.unlocked::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(to bottom, var(--evalue-green), var(--evalue-teal));
 }
-.prize-row.unlocked .prize-dot {
-    background: #00d4ff;
-    box-shadow: 0 0 6px #00d4ff;
-}
-.prize-score {
-    font-family: 'Space Mono', monospace;
-    font-size: .72rem;
-    color: #4a7fa8;
+.reward-icon { font-size: 1.2rem; width: 1.5rem; text-align: center; }
+.reward-score {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    color: #64748b;
     min-width: 44px;
 }
-.prize-row.unlocked .prize-score { color: #00d4ff; }
-.prize-name { font-size: .82rem; font-weight: 700; color: #7ec8e3; flex: 1; }
-.prize-row.unlocked .prize-name { color: #e8f4fd; }
-.prize-emoji { font-size: 1rem; }
-.prize-count {
-    font-family: 'Space Mono', monospace;
-    font-size: .68rem;
-    color: #4a7fa8;
+.reward-item.unlocked .reward-score { color: var(--evalue-green); }
+.reward-label {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    flex: 1;
+}
+.reward-item.unlocked .reward-label { color: #e2e8f0; font-weight: 700; }
+.reward-lock { font-size: 0.9rem; opacity: 0.3; }
+.reward-item.unlocked .reward-lock { opacity: 0; }
+.winner-badge {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.65rem;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: rgba(0,255,136,0.15);
+    color: var(--evalue-green);
+    border: 1px solid rgba(0,255,136,0.3);
     white-space: nowrap;
 }
-.prize-row.unlocked .prize-count { color: #7ec8e3; }
-.lock-icon { font-size: .75rem; color: #2a4a6a; }
-.prize-row.unlocked .lock-icon { display: none; }
+.winner-badge.locked {
+    background: rgba(255,255,255,0.05);
+    color: #475569;
+    border-color: #334155;
+}
 
-/* ── 分項細節 ── */
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(145px,1fr));
-    gap: .6rem;
-    margin: .8rem 0;
+/* special activity badge */
+.special-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin-top: 0.75rem;
 }
-.detail-card {
-    background: #111827;
-    border: 1px solid #1e3a5f;
-    border-radius: 12px;
-    padding: .7rem .8rem;
-    text-align: center;
-}
-.detail-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.25rem;
+.special-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(251,191,36,0.15), rgba(245,158,11,0.1));
+    border: 1px solid rgba(251,191,36,0.5);
+    color: #fbbf24;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #00d4ff;
+    letter-spacing: 0.08em;
+    box-shadow: 0 0 10px rgba(251,191,36,0.2);
 }
-.detail-lbl { font-size: .72rem; color: #4a7fa8; margin-top: .15rem; }
 
-/* ── 找不到 ── */
+/* input styling */
+.stTextInput input {
+    background: #111827 !important;
+    border: 1px solid #334155 !important;
+    color: #e2e8f0 !important;
+    border-radius: 10px !important;
+    font-family: 'Noto Sans TC', sans-serif !important;
+    font-size: 1rem !important;
+    padding: 0.7rem 1rem !important;
+}
+.stTextInput input:focus {
+    border-color: var(--evalue-green) !important;
+    box-shadow: 0 0 0 2px rgba(0,255,136,0.2) !important;
+}
+.stButton button {
+    background: linear-gradient(135deg, var(--evalue-green), var(--evalue-teal)) !important;
+    color: #0a0f1e !important;
+    font-family: 'Orbitron', monospace !important;
+    font-weight: 700 !important;
+    border: none !important;
+    border-radius: 10px !important;
+    padding: 0.7rem 2rem !important;
+    letter-spacing: 0.1em !important;
+    transition: all 0.2s !important;
+}
+.stButton button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px rgba(0,255,136,0.4) !important;
+}
 .not-found {
     text-align: center;
-    padding: 2rem;
-    color: #4a7fa8;
-    font-family: 'Space Mono', monospace;
-    font-size: .9rem;
+    color: #ef4444;
+    font-family: 'Noto Sans TC', sans-serif;
+    padding: 1rem;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 10px;
 }
-
-/* ── 分隔線 ── */
-hr { border-color: #1e3a5f !important; }
-
-/* 隱藏 Streamlit 預設元素 */
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 1rem !important; max-width: 680px; }
 </style>
 """, unsafe_allow_html=True)
 
+# ── 標題 ─────────────────────────────────────────────────
+st.markdown('<div class="main-title">EVALUE</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">⚡ 5歲生日快樂活動 ⚡</div>', unsafe_allow_html=True)
+st.markdown('<div class="birthday-row">🎂🎉🎁🎊🎈</div>', unsafe_allow_html=True)
 
-# ─────────────────────────────────────────────
-# 溫度計 HTML（全用 inline style，避免 Streamlit 壓縮 HTML 導致 class 失效）
-# ─────────────────────────────────────────────
-def render_thermometer(user_score, prize_counts):
-    capped = min(user_score, MAX_SCORE)
-    pct = capped / MAX_SCORE * 100
+# ── 載入資料 ──────────────────────────────────────────────
+degree, car, station, count, save, special = load_all_data()
+winners_map = count_winners(degree, car, station, count, save, special)
 
-    tube_h = len(PRIZES) * 46
+# ── 查詢框 ────────────────────────────────────────────────
+col1, col2 = st.columns([3, 1])
+with col1:
+    phone_input = st.text_input("", placeholder="請輸入您的手機號碼", label_visibility="collapsed")
+with col2:
+    query_btn = st.button("查詢積分", use_container_width=True)
 
-    ROW_BASE = (
-        "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:7px 12px;"
-        "margin-bottom:6px;border:1px solid #1e3a5f;"
-        "background:#111827;"
-    )
-    ROW_UNLOCKED = (
-        "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:7px 12px;"
-        "margin-bottom:6px;border:1px solid #00d4ff;"
-        "background:linear-gradient(90deg,rgba(0,212,255,.08),rgba(123,47,247,.08));"
-        "box-shadow:0 0 10px rgba(0,212,255,.15);"
-    )
-    DOT_BASE     = "width:10px;height:10px;border-radius:50%;background:#1e3a5f;flex-shrink:0;"
-    DOT_UNLOCKED = "width:10px;height:10px;border-radius:50%;background:#00d4ff;box-shadow:0 0 6px #00d4ff;flex-shrink:0;"
-    SCORE_BASE     = "font-family:monospace;font-size:.72rem;color:#4a7fa8;min-width:44px;"
-    SCORE_UNLOCKED = "font-family:monospace;font-size:.72rem;color:#00d4ff;min-width:44px;"
-    NAME_BASE      = "font-size:.82rem;font-weight:700;color:#7ec8e3;flex:1;"
-    NAME_UNLOCKED  = "font-size:.82rem;font-weight:700;color:#e8f4fd;flex:1;"
-    COUNT_BASE     = "font-family:monospace;font-size:.68rem;color:#4a7fa8;white-space:nowrap;"
-    COUNT_UNLOCKED = "font-family:monospace;font-size:.68rem;color:#7ec8e3;white-space:nowrap;"
+MAX_SCORE = REWARDS[0]["score"]  # 10000
 
-    prize_rows_html = ""
-    for p in reversed(PRIZES):
-        unlocked = user_score >= p["score"]
-        count = prize_counts.get(p["score"], 0)
-        if unlocked:
-            row_s, dot_s, score_s, name_s, count_s, lock_icon = (
-                ROW_UNLOCKED, DOT_UNLOCKED, SCORE_UNLOCKED,
-                NAME_UNLOCKED, COUNT_UNLOCKED, "🔓"
-            )
-        else:
-            row_s, dot_s, score_s, name_s, count_s, lock_icon = (
-                ROW_BASE, DOT_BASE, SCORE_BASE,
-                NAME_BASE, COUNT_BASE, "🔒"
-            )
-        prize_rows_html += (
-            f'<div style="{row_s}">' +
-            f'<div style="{dot_s}"></div>' +
-            f'<span style="{score_s}">{p["score"]:,}</span>' +
-            f'<span style="font-size:1rem;">{p["emoji"]}</span>' +
-            f'<span style="{name_s}">{p["name"]}</span>' +
-            f'<span style="{count_s}">{count} 人達標</span>' +
-            f'<span style="font-size:.75rem;">{lock_icon}</span>' +
-            '</div>'
-        )
+if query_btn and phone_input:
+    phone = phone_input.strip()
+    total = compute_total_score(phone, degree, car, station, count, save, special)
 
-    html = (
-        '<div style="display:flex;gap:20px;align-items:flex-start;margin:12px 0;">' +
-        '<div style="flex:0 0 44px;display:flex;flex-direction:column;align-items:center;">' +
-        f'<div style="width:22px;background:#1a2540;border-radius:11px 11px 0 0;' +
-        f'border:2px solid #1e3a5f;position:relative;overflow:hidden;height:{tube_h}px;">' +
-        f'<div style="position:absolute;bottom:0;left:0;right:0;height:{pct:.1f}%;' +
-        f'background:linear-gradient(to top,#ff6b35,#7b2ff7,#00d4ff);"></div>' +
-        '</div>' +
-        '<div style="width:36px;height:36px;' +
-        'background:radial-gradient(circle at 40% 40%,#ff6b35,#c0392b);' +
-        'border-radius:50%;border:3px solid #1e3a5f;margin-top:-2px;flex-shrink:0;' +
-        'box-shadow:0 0 12px rgba(255,107,53,.5);"></div>' +
-        '</div>' +
-        f'<div style="flex:1;">{prize_rows_html}</div>' +
-        '</div>'
-    )
-    st.markdown(html, unsafe_allow_html=True)
+    # 確認號碼存在
+    found = False
+    for df in [degree, car, station, count, save, special]:
+        if not df.empty and "Phone" in df.columns and phone in df["Phone"].values:
+            found = True
+            break
 
+    if not found:
+        st.markdown('<div class="not-found">❌ 查無此手機號碼，請確認後再試</div>', unsafe_allow_html=True)
+    else:
+        # ── 特殊活動標章 ──────────────────────────────────
+        marks = get_special_marks(phone, special)
+        special_html = ""
+        if marks:
+            badges = "".join(f'<span class="special-badge">⭐ {m}</span>' for m in marks)
+            special_html = f'<div class="special-row">{badges}</div>'
 
-# ─────────────────────────────────────────────
-# 主程式
-# ─────────────────────────────────────────────
-def main():
-    st.set_page_config(
-        page_title="EVALUE 5歲生日快樂活動",
-        page_icon="⚡",
-        layout="centered",
-    )
-    inject_css()
+        # ── 積分卡 ────────────────────────────────────────
+        st.markdown(f"""
+        <div class="score-card">
+            <div class="score-number">{total:,}</div>
+            <div class="score-label">累積積分 TOTAL SCORE</div>
+            {special_html}
+        </div>
+        """, unsafe_allow_html=True)
 
-    # 英雄區
-    st.markdown("""
-<div class="hero">
-    <div class="birthday-badge">🎂 5th ANNIVERSARY</div>
-    <div class="hero-title">EVALUE<br>5歲生日快樂活動</div>
-    <div class="hero-sub">輸入手機號碼，立即查詢您的活動積分</div>
+        # ── 溫度計 + 獎項 ──────────────────────────────────
+        pct = min(total / MAX_SCORE * 100, 100)
+        thermo_h = 420  # px
+
+        rewards_html = ""
+        for r in REWARDS:
+            unlocked = total >= r["score"]
+            cls = "unlocked" if unlocked else ""
+            lock_icon = "✅" if unlocked else "🔒"
+            w = winners_map.get(r["score"], 0)
+            badge_cls = "" if unlocked else "locked"
+            rewards_html += f"""
+            <div class="reward-item {cls}">
+                <span class="reward-icon">{r['icon']}</span>
+                <span class="reward-score">{r['score']:,}</span>
+                <span class="reward-label">{r['label']}</span>
+                <span class="winner-badge {badge_cls}">{w} 人達標</span>
+                <span class="reward-lock">{lock_icon}</span>
+            </div>"""
+
+        fill_h = int(thermo_h * pct / 100)
+
+        st.markdown(f"""
+        <div class="thermo-section">
+            <div class="thermo-wrap">
+                <div class="thermo-outer" style="height:{thermo_h}px;">
+                    <div class="thermo-fill" style="height:{fill_h}px;"></div>
+                </div>
+                <div class="thermo-bulb"></div>
+            </div>
+            <div class="rewards-list">
+                {rewards_html}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif query_btn and not phone_input:
+    st.warning("請輸入手機號碼")
+
+# ── footer ────────────────────────────────────────────────
+st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("""
+<div style="text-align:center;color:#334155;font-size:0.75rem;font-family:'Noto Sans TC',sans-serif;letter-spacing:0.1em;">
+© 2026 EVALUE · 5th Anniversary Event
 </div>
 """, unsafe_allow_html=True)
-
-    # 載入資料（cache_data 確保只計算一次）
-    try:
-        dfs = load_data()
-        total_df = compute_total(dfs)
-        prize_counts = get_prize_counts(total_df)
-        # 預建 phone→score 字典，查詢時 O(1)
-        score_index = {
-            name: df.set_index("Phone")["Score"].to_dict()
-            for name, df in dfs.items()
-        }
-        total_index = total_df.set_index("Phone")["Total"].to_dict()
-    except Exception as e:
-        st.error(f"❌ 資料載入失敗：{e}")
-        return
-
-    # 查詢輸入
-    col1, col2, col3 = st.columns([1, 3, 1])
-    with col2:
-        phone = st.text_input("", placeholder="例：0912345678", label_visibility="collapsed")
-        search = st.button("🔍 查詢積分")
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    if search and phone:
-        phone = phone.strip()
-
-        if phone not in total_index:
-            st.markdown(f"""
-<div class="not-found">
-    ⚠️ 找不到手機號碼 <b>{phone}</b> 的資料<br>
-    <small>請確認號碼是否正確，或尚未參與活動</small>
-</div>
-""", unsafe_allow_html=True)
-        else:
-            user_score = int(total_index[phone])
-
-            # 總分卡片
-            st.markdown(f"""
-<div class="score-card">
-    <div class="score-label">📱 {phone}</div>
-    <div class="score-number">{user_score:,}</div>
-    <div class="score-label">活動總積分</div>
-</div>
-""", unsafe_allow_html=True)
-
-            # 分項積分（O(1) 字典查詢）
-            detail_items = [
-                ("⚡ 充電度數", "Degree"),
-                ("🚗 車輛綁定", "Car"),
-                ("📍 拜訪站點", "Station"),
-                ("🔢 充電次數", "Count"),
-                ("💰 儲值金額", "Save"),
-            ]
-
-            detail_html = '<div class="detail-grid">'
-            for label, name in detail_items:
-                val = int(score_index[name].get(phone, 0))
-                detail_html += f"""
-<div class="detail-card">
-    <div class="detail-val">{val:,}</div>
-    <div class="detail-lbl">{label}</div>
-</div>"""
-            detail_html += "</div>"
-            st.markdown(detail_html, unsafe_allow_html=True)
-
-            # 溫度計 + 獎品
-            st.markdown("#### 🌡️ 積分進度 & 獎品解鎖")
-            render_thermometer(user_score, prize_counts)
-
-    elif search and not phone:
-        st.warning("請輸入手機號碼")
-
-
-if __name__ == "__main__":
-    main()
