@@ -153,7 +153,9 @@ html, body, [class*="css"] {
    Pure CSS, fixed position, pointer-events:none
 ══════════════════════════════════════════════ */
 
-/* shared column base */
+/* ══ BRICK COLUMNS — desktop only (≥900px) ══ */
+@media (min-width: 900px) {
+
 .game-col-left, .game-col-right {
     position: fixed;
     top: 0; bottom: 0;
@@ -165,7 +167,6 @@ html, body, [class*="css"] {
 .game-col-left  { left: 0; }
 .game-col-right { right: 0; }
 
-/* Brick repeating pattern via inline SVG data URI */
 .game-col-left::before,
 .game-col-right::before {
     content: '';
@@ -174,10 +175,8 @@ html, body, [class*="css"] {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='40'%3E%3Crect width='72' height='40' fill='%23162030'/%3E%3Crect x='1' y='1' width='34' height='18' rx='1' fill='%231a2d42' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='37' y='1' width='34' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='1' y='21' width='22' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='25' y='21' width='24' height='18' rx='1' fill='%231a2d42' stroke='%230a1520' stroke-width='1.5'/%3E%3Crect x='51' y='21' width='20' height='18' rx='1' fill='%231e3250' stroke='%230a1520' stroke-width='1.5'/%3E%3C/svg%3E");
     background-size: 72px 40px;
     background-repeat: repeat-y;
-    opacity: 1;
 }
 
-/* Accent stripe (glowing edge toward content) */
 .game-col-left::after,
 .game-col-right::after {
     content: '';
@@ -199,12 +198,7 @@ html, body, [class*="css"] {
 .game-col-left::after  { right: 0; }
 .game-col-right::after { left: 0; }
 
-@keyframes glowpulse {
-    from { opacity: .5; }
-    to   { opacity: 1; }
-}
-
-/* ══ WOOD DOOR PANELS — mid-column decorations ══ */
+/* ══ WOOD DOOR PANELS ══ */
 .game-door-left, .game-door-right {
     position: fixed;
     top: 50%;
@@ -220,6 +214,20 @@ html, body, [class*="css"] {
 .game-door-left  { left: 6px; }
 .game-door-right { right: 6px; }
 
+} /* end @media desktop */
+
+/* Hide side deco on mobile */
+@media (max-width: 899px) {
+    .game-col-left, .game-col-right,
+    .game-door-left, .game-door-right { display: none !important; }
+}
+
+@keyframes glowpulse {
+    from { opacity: .5; }
+    to   { opacity: 1; }
+}
+
+/* ══ DOOR PARTS (shared, only rendered on desktop) ══ */
 .door-cap {
     width: 52px; height: 12px;
     background: linear-gradient(180deg, #c97a1a, #7a4a0a);
@@ -260,7 +268,6 @@ html, body, [class*="css"] {
     border: 1.5px solid #3a2504;
     border-top: none;
 }
-/* small stars above/below door */
 .door-star {
     font-size: 1rem;
     color: #f28500;
@@ -272,18 +279,18 @@ html, body, [class*="css"] {
     from { opacity: .4; transform: scale(1); }
     to   { opacity: .9; transform: scale(1.15); }
 }
-/* icon badges on brick column */
-.col-badge {
-    position: fixed;
-    width: 36px; height: 36px;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    z-index: 102;
-    pointer-events: none;
-    background: #1e2d40;
-    border: 2px solid #f28500;
-    box-shadow: 0 0 8px rgba(242,133,0,.35);
+
+/* ══ MOBILE — top ticker thinner ══ */
+@media (max-width: 899px) {
+    .stApp::before, .stApp::after {
+        font-size: .5rem !important;
+        letter-spacing: .25em !important;
+        padding: 4px 0 !important;
+    }
+    .block-container {
+        padding-left: .75rem !important;
+        padding-right: .75rem !important;
+    }
 }
 
 .block-container {
