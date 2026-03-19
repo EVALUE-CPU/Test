@@ -76,228 +76,184 @@ def get_prize_counts(total_df):
 def inject_css():
     st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap');
 
-/* ── 全域 ── */
+/* ══════════════════════════════════════
+   CSS VARIABLES — Flat Design × Game
+══════════════════════════════════════ */
+:root {
+    --primary:      #003366;
+    --primary-mid:  #004080;
+    --primary-lt:   #e8f0f8;
+    --accent:       #f28500;
+    --accent-lt:    #fff3e0;
+    --bg:           #f0f4f8;
+    --surface:      #ffffff;
+    --surface2:     #f7fafc;
+    --border:       #dbe4ee;
+    --text:         #1a2a3a;
+    --text-mid:     #4a6080;
+    --text-lt:      #8a9bb0;
+    --success:      #00a86b;
+    --warn:         #e05c00;
+    --radius:       12px;
+    --radius-lg:    16px;
+}
+
+/* ══ 全域 ══ */
 html, body, [class*="css"] {
     font-family: 'Nunito', sans-serif;
-    background: #0a0e1a;
-    color: #e8f4fd;
+    background: var(--bg) !important;
+    color: var(--text);
 }
-.stApp { background: #0a0e1a; }
+.stApp { background: var(--bg) !important; }
+.block-container {
+    padding-top: .5rem !important;
+    max-width: 700px;
+}
+#MainMenu, footer, header { visibility: hidden; }
+hr { border-color: var(--border) !important; margin: 1rem 0 !important; }
 
-/* ── 標題區 ── */
+/* ══ HERO ══ */
 .hero {
+    background: var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 2.2rem 1.5rem 1.8rem;
     text-align: center;
-    padding: 2.5rem 1rem 1.5rem;
+    margin-bottom: 1.2rem;
+}
+.hero-badge {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .1em;
+    padding: .2rem .9rem;
+    border-radius: 20px;
+    margin-bottom: .9rem;
 }
 .hero-title {
-    font-size: 2.6rem;
+    font-size: 2.2rem;
     font-weight: 900;
-    background: linear-gradient(135deg, #00d4ff 0%, #7b2ff7 50%, #ff6b35 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: #ffffff;
     line-height: 1.2;
-    margin-bottom: .3rem;
+    margin-bottom: .4rem;
 }
+.hero-title span { color: var(--accent); }
 .hero-sub {
-    font-family: 'Space Mono', monospace;
     font-size: .85rem;
-    color: #7ec8e3;
-    letter-spacing: .12em;
-}
-.birthday-badge {
-    display: inline-block;
-    background: linear-gradient(135deg,#7b2ff7,#ff6b35);
-    color: white;
-    font-weight: 700;
-    font-size: .75rem;
-    padding: .25rem .75rem;
-    border-radius: 20px;
-    margin-bottom: 1rem;
-    letter-spacing: .08em;
+    color: rgba(255,255,255,.65);
+    letter-spacing: .05em;
 }
 
-/* ── 查詢輸入 ── */
+/* ══ INPUT ══ */
 .stTextInput > div > div > input {
-    background: #111827 !important;
-    border: 2px solid #1e3a5f !important;
-    border-radius: 12px !important;
-    color: #e8f4fd !important;
+    background: var(--surface) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    color: var(--text) !important;
     font-family: 'Space Mono', monospace !important;
-    font-size: 1.1rem !important;
-    padding: .7rem 1rem !important;
+    font-size: 1rem !important;
+    padding: .65rem 1rem !important;
     text-align: center;
-    letter-spacing: .15em;
+    letter-spacing: .12em;
+    box-shadow: none !important;
 }
 .stTextInput > div > div > input:focus {
-    border-color: #00d4ff !important;
-    box-shadow: 0 0 0 3px rgba(0,212,255,.2) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(0,51,102,.12) !important;
 }
+
+/* ══ BUTTON ══ */
 .stButton > button {
-    background: linear-gradient(135deg,#00d4ff,#7b2ff7) !important;
-    color: white !important;
-    font-weight: 700 !important;
+    background: var(--accent) !important;
+    color: #fff !important;
+    font-weight: 800 !important;
     font-family: 'Nunito', sans-serif !important;
     font-size: 1rem !important;
     border: none !important;
-    border-radius: 12px !important;
-    padding: .6rem 2rem !important;
+    border-radius: var(--radius) !important;
+    padding: .65rem 2rem !important;
     width: 100%;
-    transition: opacity .2s;
+    letter-spacing: .04em;
+    transition: background .15s, transform .1s;
 }
-.stButton > button:hover { opacity: .88 !important; }
+.stButton > button:hover {
+    background: #d97700 !important;
+    transform: translateY(-1px);
+}
+.stButton > button:active { transform: translateY(0); }
 
-/* ── 總分卡片 ── */
+/* ══ SCORE CARD ══ */
 .score-card {
-    background: linear-gradient(135deg,#111827,#1a2540);
-    border: 1px solid #1e3a5f;
-    border-radius: 20px;
-    padding: 1.8rem;
+    background: var(--primary);
+    border-radius: var(--radius-lg);
+    padding: 1.6rem 1.5rem;
     text-align: center;
-    margin: 1.2rem 0;
-    box-shadow: 0 4px 30px rgba(0,212,255,.1);
-}
-.score-number {
-    font-family: 'Space Mono', monospace;
-    font-size: 3.2rem;
-    font-weight: 700;
-    background: linear-gradient(135deg,#00d4ff,#7b2ff7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-.score-label { font-size: .85rem; color: #7ec8e3; letter-spacing: .1em; }
-
-/* ── 溫度計容器 ── */
-.thermo-wrap {
-    display: flex;
-    gap: 1.5rem;
-    align-items: flex-start;
-    margin: 1rem 0;
-}
-
-/* ── 溫度計管 ── */
-.thermo-tube {
-    flex: 0 0 44px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.thermo-bg {
-    width: 22px;
-    background: #1a2540;
-    border-radius: 11px 11px 0 0;
-    border: 2px solid #1e3a5f;
+    margin: .8rem 0;
     position: relative;
     overflow: hidden;
 }
-.thermo-fill {
+.score-card::before {
+    content: '';
     position: absolute;
-    bottom: 0; left: 0; right: 0;
-    border-radius: 0;
-    background: linear-gradient(to top, #ff6b35, #7b2ff7, #00d4ff);
-    transition: height .8s ease;
-}
-.thermo-bulb {
-    width: 36px; height: 36px;
-    background: radial-gradient(circle at 40% 40%, #ff6b35, #c0392b);
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: rgba(242,133,0,.15);
     border-radius: 50%;
-    border: 3px solid #1e3a5f;
-    margin-top: -2px;
-    flex-shrink: 0;
-    box-shadow: 0 0 12px rgba(255,107,53,.5);
 }
-
-/* ── 獎品列表 ── */
-.prize-list { flex: 1; display: flex; flex-direction: column; gap: .5rem; }
-
-.prize-row {
-    display: flex;
-    align-items: center;
-    gap: .6rem;
-    background: #111827;
-    border: 1px solid #1e3a5f;
-    border-radius: 10px;
-    padding: .45rem .75rem;
-    transition: all .3s;
-}
-.prize-row.unlocked {
-    background: linear-gradient(90deg,rgba(0,212,255,.08),rgba(123,47,247,.08));
-    border-color: #00d4ff;
-    box-shadow: 0 0 10px rgba(0,212,255,.15);
-}
-.prize-dot {
-    width: 10px; height: 10px;
+.score-card::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -20px;
+    width: 100px; height: 100px;
+    background: rgba(255,255,255,.04);
     border-radius: 50%;
-    background: #1e3a5f;
-    flex-shrink: 0;
 }
-.prize-row.unlocked .prize-dot {
-    background: #00d4ff;
-    box-shadow: 0 0 6px #00d4ff;
+.score-phone {
+    font-size: .8rem;
+    color: rgba(255,255,255,.55);
+    letter-spacing: .1em;
+    margin-bottom: .3rem;
 }
-.prize-score {
+.score-number {
     font-family: 'Space Mono', monospace;
-    font-size: .72rem;
-    color: #4a7fa8;
-    min-width: 44px;
-}
-.prize-row.unlocked .prize-score { color: #00d4ff; }
-.prize-name { font-size: .82rem; font-weight: 700; color: #7ec8e3; flex: 1; }
-.prize-row.unlocked .prize-name { color: #e8f4fd; }
-.prize-emoji { font-size: 1rem; }
-.prize-count {
-    font-family: 'Space Mono', monospace;
-    font-size: .68rem;
-    color: #4a7fa8;
-    white-space: nowrap;
-}
-.prize-row.unlocked .prize-count { color: #7ec8e3; }
-.lock-icon { font-size: .75rem; color: #2a4a6a; }
-.prize-row.unlocked .lock-icon { display: none; }
-
-/* ── 分項細節 ── */
-.detail-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(145px,1fr));
-    gap: .6rem;
-    margin: .8rem 0;
-}
-.detail-card {
-    background: #111827;
-    border: 1px solid #1e3a5f;
-    border-radius: 12px;
-    padding: .7rem .8rem;
-    text-align: center;
-}
-.detail-val {
-    font-family: 'Space Mono', monospace;
-    font-size: 1.25rem;
+    font-size: 3.4rem;
     font-weight: 700;
-    color: #00d4ff;
+    color: var(--accent);
+    line-height: 1;
 }
-.detail-lbl { font-size: .72rem; color: #4a7fa8; margin-top: .15rem; }
+.score-unit {
+    font-size: .82rem;
+    color: rgba(255,255,255,.6);
+    margin-top: .25rem;
+    letter-spacing: .08em;
+}
 
-/* ── 找不到 ── */
+/* ══ NOT FOUND ══ */
 .not-found {
-    text-align: center;
+    background: var(--surface);
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-lg);
     padding: 2rem;
-    color: #4a7fa8;
-    font-family: 'Space Mono', monospace;
+    text-align: center;
+    color: var(--text-lt);
     font-size: .9rem;
+    margin: 1rem 0;
 }
 
-/* ── 分隔線 ── */
-hr { border-color: #1e3a5f !important; }
-
-/* 隱藏 Streamlit 預設元素 */
-#MainMenu, footer, header { visibility: hidden; }
-.block-container { padding-top: 1rem !important; max-width: 680px; }
+/* ══ SECTION LABEL ══ */
+.section-label {
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--text-lt);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin: 1.2rem 0 .5rem;
+}
 </style>
 """, unsafe_allow_html=True)
-
 
 # ─────────────────────────────────────────────
 # 溫度計 HTML（全用 inline style，避免 Streamlit 壓縮 HTML 導致 class 失效）
@@ -305,30 +261,29 @@ hr { border-color: #1e3a5f !important; }
 def render_thermometer(user_score, prize_counts):
     capped = min(user_score, MAX_SCORE)
     pct = capped / MAX_SCORE * 100
+    tube_h = len(PRIZES) * 50
 
-    tube_h = len(PRIZES) * 46
-
+    # Flat Design palette
     ROW_BASE = (
         "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:7px 12px;"
-        "margin-bottom:6px;border:1px solid #1e3a5f;"
-        "background:#111827;"
+        "border-radius:10px;padding:8px 12px;"
+        "margin-bottom:5px;border:1px solid #dbe4ee;"
+        "background:#ffffff;"
     )
     ROW_UNLOCKED = (
         "display:flex;align-items:center;gap:8px;"
-        "border-radius:10px;padding:7px 12px;"
-        "margin-bottom:6px;border:1px solid #00d4ff;"
-        "background:linear-gradient(90deg,rgba(0,212,255,.08),rgba(123,47,247,.08));"
-        "box-shadow:0 0 10px rgba(0,212,255,.15);"
+        "border-radius:10px;padding:8px 12px;"
+        "margin-bottom:5px;border:1px solid #f28500;"
+        "background:#fff8f0;"
     )
-    DOT_BASE     = "width:10px;height:10px;border-radius:50%;background:#1e3a5f;flex-shrink:0;"
-    DOT_UNLOCKED = "width:10px;height:10px;border-radius:50%;background:#00d4ff;box-shadow:0 0 6px #00d4ff;flex-shrink:0;"
-    SCORE_BASE     = "font-family:monospace;font-size:.72rem;color:#4a7fa8;min-width:44px;"
-    SCORE_UNLOCKED = "font-family:monospace;font-size:.72rem;color:#00d4ff;min-width:44px;"
-    NAME_BASE      = "font-size:.82rem;font-weight:700;color:#7ec8e3;flex:1;"
-    NAME_UNLOCKED  = "font-size:.82rem;font-weight:700;color:#e8f4fd;flex:1;"
-    COUNT_BASE     = "font-family:monospace;font-size:.68rem;color:#4a7fa8;white-space:nowrap;"
-    COUNT_UNLOCKED = "font-family:monospace;font-size:.68rem;color:#7ec8e3;white-space:nowrap;"
+    DOT_BASE     = "width:10px;height:10px;border-radius:50%;background:#dbe4ee;flex-shrink:0;"
+    DOT_UNLOCKED = "width:10px;height:10px;border-radius:50%;background:#f28500;flex-shrink:0;"
+    SCORE_BASE     = "font-family:monospace;font-size:.72rem;color:#8a9bb0;min-width:48px;"
+    SCORE_UNLOCKED = "font-family:monospace;font-size:.72rem;color:#b36200;min-width:48px;font-weight:700;"
+    NAME_BASE      = "font-size:.82rem;font-weight:600;color:#8a9bb0;flex:1;"
+    NAME_UNLOCKED  = "font-size:.82rem;font-weight:700;color:#003366;flex:1;"
+    COUNT_BASE     = "font-family:monospace;font-size:.68rem;color:#b0bec5;white-space:nowrap;"
+    COUNT_UNLOCKED = "font-family:monospace;font-size:.68rem;color:#f28500;white-space:nowrap;"
 
     prize_rows_html = ""
     for p in PRIZES:
@@ -356,23 +311,23 @@ def render_thermometer(user_score, prize_counts):
         )
 
     html = (
-        '<div style="display:flex;gap:20px;align-items:flex-start;margin:12px 0;">' +
-        '<div style="flex:0 0 44px;display:flex;flex-direction:column;align-items:center;">' +
-        f'<div style="width:22px;background:#1a2540;border-radius:11px 11px 0 0;' +
-        f'border:2px solid #1e3a5f;position:relative;overflow:hidden;height:{tube_h}px;">' +
-        f'<div style="position:absolute;bottom:0;left:0;right:0;height:{pct:.1f}%;' +
-        f'background:linear-gradient(to top,#ff6b35,#7b2ff7,#00d4ff);"></div>' +
+        '<div style="display:flex;gap:16px;align-items:flex-start;margin:8px 0;">' +
+        # tube column
+        '<div style="flex:0 0 40px;display:flex;flex-direction:column;align-items:center;">' +
+            f'<div style="width:20px;background:#f0f4f8;border-radius:10px 10px 0 0;' +
+            f'border:2px solid #dbe4ee;position:relative;overflow:hidden;height:{tube_h}px;">' +
+                f'<div style="position:absolute;bottom:0;left:0;right:0;height:{pct:.1f}%;' +
+                f'background:linear-gradient(to top,#f28500,#ffb347);"></div>' +
+            '</div>' +
+            '<div style="width:32px;height:32px;' +
+            'background:#f28500;border-radius:50%;' +
+            'border:3px solid #dbe4ee;margin-top:-2px;flex-shrink:0;"></div>' +
         '</div>' +
-        '<div style="width:36px;height:36px;' +
-        'background:radial-gradient(circle at 40% 40%,#ff6b35,#c0392b);' +
-        'border-radius:50%;border:3px solid #1e3a5f;margin-top:-2px;flex-shrink:0;' +
-        'box-shadow:0 0 12px rgba(255,107,53,.5);"></div>' +
-        '</div>' +
+        # prize list
         f'<div style="flex:1;">{prize_rows_html}</div>' +
         '</div>'
     )
     st.markdown(html, unsafe_allow_html=True)
-
 
 # ─────────────────────────────────────────────
 # 主程式
@@ -388,8 +343,8 @@ def main():
     # 英雄區
     st.markdown("""
 <div class="hero">
-    <div class="birthday-badge">🎂 5th ANNIVERSARY</div>
-    <div class="hero-title">EVALUE<br>5歲生日快樂活動</div>
+    <div class="hero-badge">🎂 5th ANNIVERSARY</div>
+    <div class="hero-title">EVALUE <span>5歲</span>生日快樂活動</div>
     <div class="hero-sub">輸入手機號碼，立即查詢您的活動積分</div>
 </div>
 """, unsafe_allow_html=True)
@@ -433,26 +388,42 @@ def main():
             # 總分卡片
             st.markdown(f"""
 <div class="score-card">
-    <div class="score-label">📱 {phone}</div>
+    <div class="score-phone">📱 {phone}</div>
     <div class="score-number">{user_score:,}</div>
-    <div class="score-label">活動總積分</div>
+    <div class="score-unit">活動總積分</div>
 </div>
 """, unsafe_allow_html=True)
 
             # ── 分項積分詳細卡片 ──
-            st.markdown('<div style="margin:16px 0 6px;font-size:.8rem;color:#4a7fa8;letter-spacing:.1em;">📊 分項積分明細</div>', unsafe_allow_html=True)
+            st.markdown('<div class="section-label">📊 分項積分明細</div>', unsafe_allow_html=True)
 
-            def make_card(score, title, emoji, rules_html, progress_html, accent="#00d4ff"):
+            def make_card(score, title, emoji, rules_html, progress_html, accent="#f28500"):
+                # Flat Design card: white surface, primary title, accent score
+                bar_w = min(int(score / 1500 * 100), 100)  # rough visual bar
                 return (
-                    f'<div style="background:#111827;border:1px solid #1e3a5f;border-radius:14px;' +
-                    f'padding:14px 16px;margin-bottom:10px;">' +
-                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
-                    f'<span style="font-size:.95rem;font-weight:700;color:#e8f4fd;">{emoji} {title}</span>' +
-                    f'<span style="font-family:monospace;font-size:1.15rem;font-weight:700;color:{accent};">+{score:,} 分</span>' +
-                    f'</div>' +
-                    f'<div style="font-size:.75rem;color:#4a7fa8;line-height:1.7;margin-bottom:6px;">{rules_html}</div>' +
-                    f'<div style="background:#0a0e1a;border-radius:8px;padding:7px 10px;font-size:.78rem;color:#7ec8e3;">{progress_html}</div>' +
-                    f'</div>'
+                    '<div style="background:#fff;border:1px solid #dbe4ee;border-radius:12px;' +
+                    'padding:14px 16px;margin-bottom:10px;">' +
+                        # header row
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">' +
+                            f'<div style="display:flex;align-items:center;gap:8px;">' +
+                                f'<div style="background:#e8f0f8;border-radius:8px;width:32px;height:32px;' +
+                                f'display:flex;align-items:center;justify-content:center;font-size:1.1rem;">{emoji}</div>' +
+                                f'<span style="font-weight:800;font-size:.92rem;color:#003366;">{title}</span>' +
+                            '</div>' +
+                            f'<div style="background:#fff3e0;border-radius:8px;padding:3px 10px;">' +
+                                f'<span style="font-family:monospace;font-size:1rem;font-weight:700;color:{accent};">+{score:,}</span>' +
+                                f'<span style="font-size:.7rem;color:#b36200;"> 分</span>' +
+                            '</div>' +
+                        '</div>' +
+                        # progress bar
+                        '<div style="background:#f0f4f8;border-radius:4px;height:5px;margin-bottom:10px;">' +
+                            f'<div style="background:{accent};border-radius:4px;height:5px;width:{bar_w}%;transition:width .6s;"></div>' +
+                        '</div>' +
+                        # rules
+                        f'<div style="font-size:.73rem;color:#6a80a0;line-height:1.8;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #eef1f5;">{rules_html}</div>' +
+                        # progress detail
+                        f'<div style="font-size:.8rem;color:#2a4a6a;">{progress_html}</div>' +
+                    '</div>'
                 )
 
             cards_html = ""
@@ -465,7 +436,7 @@ def main():
             cards_html += make_card(
                 deg_score, "充電度數", "🔋",
                 "DC 充電：每 1 度 = 1 分 ／ AC 充電：每 10 度 = 1 分",
-                f"DC <b style='color:#00d4ff;'>{dc:,.2f} 度</b> ／ AC <b style='color:#00d4ff;'>{ac:,.2f} 度</b>"
+                f"DC <b style='color:#003366;'>{dc:,.2f} 度</b>　／　AC <b style='color:#003366;'>{ac:,.2f} 度</b>"
             )
 
             # 🚗 車輛綁定
@@ -475,11 +446,11 @@ def main():
                 car_bound = str(car_row["CarCount"].iloc[0]).strip().lower() == "true"
             car_score = int(score_index["Car"].get(phone, 0))
             bound_tag = (
-                '<span style="background:#00d4ff22;color:#00d4ff;border:1px solid #00d4ff55;' +
-                'border-radius:6px;padding:1px 8px;font-weight:700;">✅ 已完成綁定</span>'
+                '<span style="background:#e6f4ed;color:#00a86b;border:1px solid #00a86b44;' +
+                'border-radius:6px;padding:2px 10px;font-weight:700;">✅ 已完成綁定</span>'
                 if car_bound else
-                '<span style="background:#ff6b3522;color:#ff6b35;border:1px solid #ff6b3555;' +
-                'border-radius:6px;padding:1px 8px;">⚠️ 尚未綁定</span>'
+                '<span style="background:#fff0e6;color:#e05c00;border:1px solid #e05c0044;' +
+                'border-radius:6px;padding:2px 10px;font-weight:700;">⚠️ 尚未綁定</span>'
             )
             cards_html += make_card(
                 car_score, "車輛綁定", "🚗",
@@ -495,7 +466,7 @@ def main():
             cards_html += make_card(
                 sta_score, "拜訪站點", "📍",
                 "一般站點：每站 10 分 ／ 精選站點：每站 30 分（基本 10 + 額外 20）",
-                f"精選站點 <b style='color:#ffd700;'>{special_cnt} 站</b> ／ 一般站點 <b style='color:#00d4ff;'>{normal_cnt} 站</b>　共 <b style='color:#e8f4fd;'>{special_cnt+normal_cnt} 站</b>",
+                f"精選站點 <b style='color:#f28500;'>{special_cnt} 站</b>　／　一般站點 <b style='color:#003366;'>{normal_cnt} 站</b>　共 <b style='color:#1a2a3a;font-size:.9rem;'>{special_cnt+normal_cnt} 站</b>",
                 accent="#ffd700"
             )
 
@@ -508,7 +479,7 @@ def main():
             cards_html += make_card(
                 cnt_score, "充電次數", "🔢",
                 "每累積 20 次充電 = 50 分",
-                f"目前充電 <b style='color:#00d4ff;'>{charge_cnt} 次</b>　距下一里程碑還差 <b style='color:#ff6b35;'>{cnt_left} 次</b>（第 {next_milestone} 次）"
+                f"目前充電 <b style='color:#003366;'>{charge_cnt} 次</b>　距下一里程碑還差 <b style='color:#f28500;'>{cnt_left} 次</b>（第 {next_milestone} 次）"
             )
 
             # 💰 儲值金額
@@ -518,7 +489,7 @@ def main():
             cards_html += make_card(
                 sav_score, "儲值金額", "💰",
                 "每儲值 1,000 元 = 10 分",
-                f"累積儲值 <b style='color:#00d4ff;'>NT$ {total_amt:,}</b>"
+                f"累積儲值 <b style='color:#003366;'>NT$ {total_amt:,}</b>"
             )
 
             # 🌟 特殊活動
@@ -529,8 +500,8 @@ def main():
                 cards_html += make_card(
                     sp_score, "特殊活動", "🌟",
                     "參與特殊活動獲得額外積分",
-                    f"活動名稱：<b style='color:#ffd700;'>{mark}</b>",
-                    accent="#ffd700"
+                    f"活動名稱：<b style='color:#f28500;'>{mark}</b>",
+                    accent="#f28500"
                 )
 
             st.markdown(cards_html, unsafe_allow_html=True)
