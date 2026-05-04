@@ -58,7 +58,16 @@ def load_data():
             dfs[name] = df.rename(columns={phone_col: "Phone", score_col: "Score"})
         else:
             dfs[name] = pd.DataFrame(columns=["Phone", "Score"])
-    return dfs
+
+    # 讀取姓名對照表
+    name_path = os.path.join(DATA_DIR, "Name.csv")
+    if os.path.exists(name_path):
+        name_df = pd.read_csv(name_path, dtype={"Phone": str})
+        name_df["Phone"] = name_df["Phone"].str.strip()
+    else:
+        name_df = pd.DataFrame(columns=["Phone", "Name"])
+
+    return dfs, name_df
 
 
 @st.cache_data(ttl=600)
@@ -80,6 +89,37 @@ def get_prize_counts(total_df):
     for p in PRIZES:
         counts[p["score"]] = int((total_df["Total"] >= p["score"]).sum())
     return counts
+
+
+# ─────────────────────────────────────────────
+# 遮蔽函式
+# ─────────────────────────────────────────────
+def mask_phone(phone: str) -> str:
+    p = str(phone).strip()
+    if len(p) >= 10:
+        return p[:4] + "****" + p[-3:]
+    return p[:2] + "****" + p[-2:]
+
+
+def mask_name(name: str) -> str:
+    name = str(name).strip()
+    if not name:
+        return "***"
+    # 判斷是否含中文字
+    has_cjk = any('\u4e00' <= c <= '\u9fff' for c in name)
+    if not has_cjk:
+        # 英文 / 暱稱 / 混合（不含中文）
+        if len(name) <= 4:
+            return name[:1] + "*" * (len(name) - 1)
+        else:
+            return name[:2] + "*" * (len(name) - 2)
+    # 中文姓名
+    if len(name) == 2:
+        return name[0] + "O"
+    elif len(name) == 3:
+        return name[0] + "O" + name[-1]
+    else:  # 4字以上
+        return name[0] + "O" * (len(name) - 2) + name[-1]
 
 
 # ─────────────────────────────────────────────
@@ -891,6 +931,102 @@ window.addEventListener("load", function() {{
 
 
 # ─────────────────────────────────────────────
+# TOP 30 排行榜
+# ─────────────────────────────────────────────
+def render_leaderboard(total_df: pd.DataFrame, name_df: pd.DataFrame):
+    # 合併姓名
+    lb = total_df.merge(name_df, on="Phone", how="left")
+    lb["Name"] = lb["Name"].fillna("")
+
+    # 排序：積分高到低，同分依手機排序
+    lb = lb.sort_values(["Total", "Phone"], ascending=[False, True]).reset_index(drop=True)
+    lb = lb.head(30)
+
+    rows_html = ""
+    for i, row in lb.iterrows():
+        rank = i + 1
+        masked_phone = mask_phone(row["Phone"])
+        name_raw = str(row["Name"]).strip()
+        masked_n = mask_name(name_raw) if name_raw else mask_phone(row["Phone"])[:4] + "…"
+
+        if rank == 1:
+            rank_badge = '<span style="font-size:1.3rem;line-height:1;">🥇</span>'
+            row_style = "background:linear-gradient(90deg,#2a1f0d88,#1e2d40);border-bottom:1px solid #f2850055;"
+            score_color = "#f28500"
+        elif rank == 2:
+            rank_badge = '<span style="font-size:1.3rem;line-height:1;">🥈</span>'
+            row_style = "background:linear-gradient(90deg,#1a203088,#1e2d40);border-bottom:1px solid #8aaac855;"
+            score_color = "#c8d8e8"
+        elif rank == 3:
+            rank_badge = '<span style="font-size:1.3rem;line-height:1;">🥉</span>'
+            row_style = "background:linear-gradient(90deg,#1f1a1088,#1e2d40);border-bottom:1px solid #cd7f3255;"
+            score_color = "#cd7f32"
+        else:
+            rank_badge = f'<span style="font-family:monospace;font-size:.82rem;color:#506880;font-weight:700;">{rank:02d}</span>'
+            row_style = "border-bottom:1px solid #253547;"
+            score_color = "#8aaac8"
+
+        rows_html += f"""
+        <tr style="{row_style}">
+          <td style="padding:9px 10px;text-align:center;width:42px;">{rank_badge}</td>
+          <td style="padding:9px 6px;font-size:.88rem;font-weight:700;color:#e8f0f8;
+                     max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{masked_n}</td>
+          <td style="padding:9px 6px;font-family:monospace;font-size:.76rem;color:#506880;
+                     white-space:nowrap;">{masked_phone}</td>
+          <td style="padding:9px 12px;text-align:right;font-family:monospace;font-size:.95rem;
+                     font-weight:800;color:{score_color};white-space:nowrap;">{int(row['Total']):,}</td>
+        </tr>
+        """
+
+    st.markdown(f"""
+<div style="margin-top:2rem;margin-bottom:0;">
+
+  <!-- 標題列 -->
+  <div style="
+    font-size:.72rem;font-weight:900;letter-spacing:.18em;
+    text-transform:uppercase;color:#ffd700;margin-bottom:1rem;
+    display:flex;align-items:center;gap:8px;
+  ">🏆 TOP 30 排行榜
+    <span style="flex:1;height:1px;background:var(--border);display:inline-block;"></span>
+  </div>
+
+  <!-- 表格容器 -->
+  <div style="
+    background:var(--bg2);
+    border:1px solid var(--border);
+    border-radius:var(--radius-lg);
+    overflow:hidden;
+  ">
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#0f1923;border-bottom:2px solid #2a3f58;">
+          <th style="padding:8px 10px;font-size:.65rem;color:#506880;letter-spacing:.12em;
+                     text-align:center;width:42px;font-weight:800;">#</th>
+          <th style="padding:8px 6px;font-size:.65rem;color:#506880;letter-spacing:.12em;
+                     text-align:left;font-weight:800;">會員</th>
+          <th style="padding:8px 6px;font-size:.65rem;color:#506880;letter-spacing:.12em;
+                     text-align:left;font-weight:800;">手機</th>
+          <th style="padding:8px 12px;font-size:.65rem;color:#506880;letter-spacing:.12em;
+                     text-align:right;font-weight:800;">積分</th>
+        </tr>
+      </thead>
+      <tbody>
+        {rows_html}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 底部說明 -->
+  <div style="font-size:.67rem;color:var(--text-lt);text-align:center;
+              margin-top:.5rem;padding-bottom:.25rem;line-height:1.8;">
+    ⏱ 資料每 30 秒更新一次 · 僅顯示前 30 名 · 同積分依手機號碼排序
+  </div>
+
+</div>
+""", unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────
 # 活動說明區塊（顯示在注意事項之前）
 # ─────────────────────────────────────────────
 def render_activity():
@@ -1263,7 +1399,7 @@ def main():
 
     # 載入資料
     try:
-        dfs = load_data()
+        dfs, name_df = load_data()
         total_df = compute_total(dfs)
         prize_counts = get_prize_counts(total_df)
         score_index = {
@@ -1343,6 +1479,9 @@ def main():
 
     elif search and not phone:
         st.warning("請輸入手機號碼")
+
+    # ── TOP 30 排行榜（活動說明之前）──
+    render_leaderboard(total_df, name_df)
 
     # ── 活動說明（注意事項之前）──
     render_activity()
