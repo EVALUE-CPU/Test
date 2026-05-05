@@ -1074,7 +1074,6 @@ def render_leaderboard(total_df, name_map):
   </div>
   <div style="font-size:.68rem;color:var(--text-lt);text-align:right;
               margin-top:.5rem;padding-right:.3rem;">
-    ※ 每 10 分鐘更新一次 ／ 姓名及手機均已遮蔽
   </div>
 </div>
 """, unsafe_allow_html=True)
